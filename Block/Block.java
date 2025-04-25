@@ -9,7 +9,7 @@ public abstract class Block {
         this.x = x;
         this.y = y;
 
-    }
+    }//
     public int getX() {
         return x;
     }
