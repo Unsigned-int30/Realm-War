@@ -1,4 +1,4 @@
-package Structur;
+package Kingdom.Structur;
 
 import Game.Player;
 
