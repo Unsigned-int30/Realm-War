@@ -1,26 +1,28 @@
-package Unit;
+package Kingdom.Unit;
 
 import Game.Player;
 
-public  abstract class Unit {
+public abstract class Unit {
 
     private int hitPoints;
     private int movementBlockRange;
     private int attackPower;
-    private int attackRange ;
+    private int attackRange;
     private int paymentGold;
     private int rationFood;
-    private int unitSpace ;
-    private Player plsyerUnits;
-    public Unit( int hitPoints,int movementBlock,int attackPower,int attackRange,int paymentGold,int rationFood,int unitSpace,Player plsyerUnits ) {
+    private int unitSpace;
+    private Player owner;
+
+    public Unit(int hitPoints, int movementBlockRange, int attackPower, int attackRange,
+                int paymentGold, int rationFood, int unitSpace, Player owner) {
         this.hitPoints = hitPoints;
-        this.movementBlockRange = movementBlock;
+        this.movementBlockRange = movementBlockRange;
         this.attackPower = attackPower;
         this.attackRange = attackRange;
         this.paymentGold = paymentGold;
         this.rationFood = rationFood;
         this.unitSpace = unitSpace;
-        this.plsyerUnits = plsyerUnits;
+        this.owner = owner;
     }
 
     public int getHitPoints() {
@@ -51,39 +53,34 @@ public  abstract class Unit {
         return unitSpace;
     }
 
-    public Player getPlsyerUnits() {
-        return plsyerUnits;
+    public Player getOwner() {
+        return owner;
     }
+
 
     public void setHitPoints(int hitPoints) {
-        this.hitPoints = hitPoints;
+        if (hitPoints < 0) {
+            this.hitPoints = 0;
+        } else {
+            this.hitPoints = hitPoints;
+        }
     }
 
-    public void setMovementBlockRange(int movementBlockRange) {
-        this.movementBlockRange = movementBlockRange;
+    public void setOwner(Player owner) {
+        this.owner = owner;
     }
 
-    public void setAttackPower(int attackPower) {
-        this.attackPower = attackPower;
-    }
+    public abstract Unit merge(Unit other);
 
-    public void setAttackRange(int attackRange) {
-        this.attackRange = attackRange;
-    }
+    public abstract boolean canMerge(Unit other);
 
-    public void setPaymentGold(int paymentGold) {
-        this.paymentGold = paymentGold;
-    }
+    public abstract boolean canAttack(Unit target);
 
-    public void setRationFood(int rationFood) {
-        this.rationFood = rationFood;
-    }
+    public abstract void dealDamage(int damage);
+   // public abstract void heal(int amount);
+   // public abstract void removeUnit(Unit remove)
 
-    public void setUnitSpace(int unitSpace) {
-        this.unitSpace = unitSpace;
-    }
-
-    public void setPlsyerUnits(Player plsyerUnits) {
-        this.plsyerUnits = plsyerUnits;
+    public boolean isAlive() {
+        return this.hitPoints > 0;
     }
 }

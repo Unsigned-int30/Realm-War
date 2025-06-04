@@ -1,38 +1,45 @@
-package Unit;
+package Kingdom.Unit;
 
 import Game.Player;
 
-public class Spearman extends Unit implements UnitProperties {
-    public Spearman(int hitPoints, int movementBlock, int attackPower, int attackRange, int paymentGold, int rationFood,int unitSpace , Player plsyerUnits) {
-super(hitPoints, movementBlock, attackPower, attackRange, paymentGold,rationFood, unitSpace, plsyerUnits);
+public class Spearman extends Unit {
+
+    public static final int SPEARMAN_HP = 20;
+    public static final int SPEARMAN_MOVEMENT = 1; // یا 2
+    public static final int SPEARMAN_ATTACK_POWER = 5;
+    public static final int SPEARMAN_ATTACK_RANGE = 1; // یا 2 اگر نیزه بلند است
+    public static final int SPEARMAN_GOLD_COST = 2;
+    public static final int SPEARMAN_FOOD_COST = 1;
+    public static final int SPEARMAN_UNIT_SPACE = 1;
+
+    public Spearman(Player owner) {
+        super(SPEARMAN_HP, SPEARMAN_MOVEMENT, SPEARMAN_ATTACK_POWER, SPEARMAN_ATTACK_RANGE,
+                SPEARMAN_GOLD_COST, SPEARMAN_FOOD_COST, SPEARMAN_UNIT_SPACE, owner);
     }
 
     @Override
     public Unit merge(Unit other) {
-        if( other instanceof Spearman ) {
-            return  new Swordman(getHitPoints(),getMovementBlockRange(),getAttackPower(),getAttackRange(),getPaymentGold(),getRationFood(),getUnitSpace(),getPlsyerUnits());
+        if (canMerge(other)) {
+            // دو Spearman یک Swordman می‌سازند
+            return new Swordman(getOwner());
         }
         return null;
-    }
-    public boolean isAlive() {
-        return getHitPoints() > 0;
-    }
-
-    @Override
-    public boolean canAttack(Unit target) {
-        return true;
     }
 
     @Override
     public boolean canMerge(Unit other) {
-        return other instanceof Spearman;
+        return other instanceof Spearman && this.getOwner() == other.getOwner();
+    }
+
+    @Override
+    public boolean canAttack(Unit target) {
+        return target != null && target.getOwner() != this.getOwner() && target.isAlive();
     }
 
     @Override
     public void dealDamage(int damage) {
-        setHitPoints(getHitPoints() - damage);
-    }
-    public void heal( int damage ) {
-        setHitPoints(getHitPoints() + damage);
+        if (damage > 0) {
+            setHitPoints(getHitPoints() - damage);
+        }
     }
 }
