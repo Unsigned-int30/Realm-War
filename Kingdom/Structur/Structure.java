@@ -1,15 +1,13 @@
-package Structur;
+package Kingdom.Structure;// یا Structure اگر نام پکیج را اصلاح کردید
 import Game.Player;
 
-public abstract class  Structure {
+public abstract class Structure {
     private int durability;
     private Player Owner;
     private int level;
     private int maintenanceCost;
     private int buildingCost;
     private int levelUpCost;
-
-
 
     public Structure(int durability, Player player, int level,
                      int maintenanceCost, int buildingCost, int levelUpCost) {
@@ -20,7 +18,6 @@ public abstract class  Structure {
         this.buildingCost = buildingCost;
         this.levelUpCost = levelUpCost;
     }
-
 
     public int getDurability() {
         return durability;
@@ -68,5 +65,18 @@ public abstract class  Structure {
     public int getLevelUpCost() {
         return levelUpCost;
     }
+
     public abstract void upgradeLevel();
-} //
+
+    public int getProvidedUnitSpace() {
+        return 0;
+    }
+
+    public int getGoldProductionTurn() {
+        return 0;
+    }
+
+    public int getFoodProduction() {
+        return 0;
+    }
+}
