@@ -1,4 +1,5 @@
-package Game;
+package Utils;
+
 // برای مشخص کردن تایپ منابع استفاده میشه
 public class ResourceYield {
     private final ResourceType type;

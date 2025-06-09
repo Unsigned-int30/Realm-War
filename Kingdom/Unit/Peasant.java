@@ -3,19 +3,18 @@ package Kingdom.Unit;
 import Game.Player;
 
 public class Peasant extends Unit {
+        public static final int CREATION_GOLD_COST = 10;
+        public static final int PEASANT_HP = 10;
+        public static final int PEASANT_MOVEMENT = 1;
+        public static final int PEASANT_ATTACK_POWER = 1;
+        public static final int PEASANT_ATTACK_RANGE = 1;
+        public static final int PEASANT_GOLD_COST = 1;
+        public static final int PEASANT_FOOD_COST = 1;
+        public static final int PEASANT_UNIT_SPACE = 1;
 
-    public static final int PEASANT_HP = 10;
-    public static final int PEASANT_MOVEMENT = 1;
-    public static final int PEASANT_ATTACK_POWER = 1;
-    public static final int PEASANT_ATTACK_RANGE = 1;
-    public static final int PEASANT_GOLD_COST = 1;
-    public static final int PEASANT_FOOD_COST = 1;
-    public static final int PEASANT_UNIT_SPACE = 1;
-
-    public Peasant(Player owner) {
-        super(PEASANT_HP, PEASANT_MOVEMENT, PEASANT_ATTACK_POWER, PEASANT_ATTACK_RANGE,
-                PEASANT_GOLD_COST, PEASANT_FOOD_COST, PEASANT_UNIT_SPACE, owner);
-    }
+        public Peasant(Player owner) {
+            super(PEASANT_HP, PEASANT_MOVEMENT, PEASANT_ATTACK_POWER, PEASANT_ATTACK_RANGE, PEASANT_GOLD_COST, PEASANT_FOOD_COST, PEASANT_UNIT_SPACE, owner);
+        }
 
     @Override
     public Unit merge(Unit other) {

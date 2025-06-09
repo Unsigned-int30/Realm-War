@@ -2,6 +2,8 @@ package Game;
 
 import Kingdom.Block.Block;
 import Kingdom.Structure.Structure;
+import Utils.ResourceType;
+import Utils.ResourceYield;
 
 import java.util.List;
 
@@ -39,8 +41,8 @@ public class GameManager {
         List<Structure> structures = player.getStructures();
         for (Structure structure : structures) {
             if (structure != null) {
-                int goldFromStructure = structure.getGoldProductionTurn();
-                int foodFromStructure = structure.getFoodProduction();
+                int goldFromStructure = structure.getGoldProductionPerTurn();
+                int foodFromStructure = structure.getFoodProductionPerTurn();
 
                 if (goldFromStructure > 0) {
                     totalGoldCollected += goldFromStructure;

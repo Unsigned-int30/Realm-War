@@ -1,9 +1,9 @@
-package Kingdom.Unit; // یا Kingdom.Unit
+package Kingdom.Unit;
 
 import Game.Player;
 
 public class Knight extends Unit {
-
+    public static final int CREATION_GOLD_COST = 50;
     public static final int KNIGHT_HP = 50;
     public static final int KNIGHT_MOVEMENT = 3;
     public static final int KNIGHT_ATTACK_POWER = 12;
@@ -13,8 +13,7 @@ public class Knight extends Unit {
     public static final int KNIGHT_UNIT_SPACE = 3;
 
     public Knight(Player owner) {
-        super(KNIGHT_HP, KNIGHT_MOVEMENT, KNIGHT_ATTACK_POWER, KNIGHT_ATTACK_RANGE,
-                KNIGHT_GOLD_COST, KNIGHT_FOOD_COST, KNIGHT_UNIT_SPACE, owner);
+        super(KNIGHT_HP, KNIGHT_MOVEMENT, KNIGHT_ATTACK_POWER, KNIGHT_ATTACK_RANGE, KNIGHT_GOLD_COST, KNIGHT_FOOD_COST, KNIGHT_UNIT_SPACE, owner);
     }
 
     @Override

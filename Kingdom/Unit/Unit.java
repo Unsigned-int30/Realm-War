@@ -1,6 +1,7 @@
 package Kingdom.Unit;
 
 import Game.Player;
+import Kingdom.Block.Block;
 
 public abstract class Unit {
 
@@ -12,9 +13,9 @@ public abstract class Unit {
     private int rationFood;
     private int unitSpace;
     private Player owner;
+    private Block block;
 
-    public Unit(int hitPoints, int movementBlockRange, int attackPower, int attackRange,
-                int paymentGold, int rationFood, int unitSpace, Player owner) {
+    public Unit(int hitPoints, int movementBlockRange, int attackPower, int attackRange, int paymentGold, int rationFood, int unitSpace, Player owner) {
         this.hitPoints = hitPoints;
         this.movementBlockRange = movementBlockRange;
         this.attackPower = attackPower;
@@ -23,41 +24,20 @@ public abstract class Unit {
         this.rationFood = rationFood;
         this.unitSpace = unitSpace;
         this.owner = owner;
+        this.block = null;
     }
 
-    public int getHitPoints() {
-        return hitPoints;
-    }
-
-    public int getMovementBlockRange() {
-        return movementBlockRange;
-    }
-
-    public int getAttackPower() {
-        return attackPower;
-    }
-
-    public int getAttackRange() {
-        return attackRange;
-    }
-
-    public int getPaymentGold() {
-        return paymentGold;
-    }
-
-    public int getRationFood() {
-        return rationFood;
-    }
-
-    public int getUnitSpace() {
-        return unitSpace;
-    }
-
-    public Player getOwner() {
-        return owner;
-    }
-
-
+    public int getHitPoints() { return hitPoints; }
+    public int getMovementBlockRange() { return movementBlockRange; }
+    public int getAttackPower() { return attackPower; }
+    public int getAttackRange() { return attackRange; }
+    public int getPaymentGold() { return paymentGold; }
+    public int getRationFood() { return rationFood; }
+    public int getUnitSpace() { return unitSpace; }
+    public Player getOwner() { return owner; }
+    public void setOwner(Player owner) { this.owner = owner; }
+    public Block getBlock() { return block; }
+    public void setBlock(Block block) { this.block = block; }
     public void setHitPoints(int hitPoints) {
         if (hitPoints < 0) {
             this.hitPoints = 0;
@@ -66,14 +46,8 @@ public abstract class Unit {
         }
     }
 
-    public void setOwner(Player owner) {
-        this.owner = owner;
-    }
-
     public abstract Unit merge(Unit other);
-
     public abstract boolean canMerge(Unit other);
-
     public abstract boolean canAttack(Unit target);
 
     public abstract void dealDamage(int damage);

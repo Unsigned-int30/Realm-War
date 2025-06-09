@@ -3,17 +3,16 @@ package Kingdom.Structure;
 import Game.Player;
 
 public class Tower extends Structure {
-
+    public static final int BUILDING_COST = 40;
+    public static final int INITIAL_DURABILITY = 60;
+    public static final int MAINTENANCE_COST = 4;
+    public static final int INITIAL_LEVEL_UP_COST = 30;
     private static final int MAX_LEVEL_TOWER = 3;
     private static final int DURABILITY_INCREASE_PER_LEVEL = 30;
 
-    public Tower(int durability, Player player, int level, int maintenanceCost, int buildingCost, int levelUpCost) {
-        super(durability, player, level, maintenanceCost, buildingCost, levelUpCost);
+    public Tower(Player owner) {
+        super(INITIAL_DURABILITY, owner, 1, MAINTENANCE_COST, BUILDING_COST, INITIAL_LEVEL_UP_COST);
     }
-
-    // private int calculateInitialAttackPower(int level) {
-    //     return level * 10;
-    // }
 
     public int getRestrictionLevel() {
         return getLevel();
@@ -24,14 +23,6 @@ public class Tower extends Structure {
         if (getLevel() < MAX_LEVEL_TOWER) {
             setLevel(getLevel() + 1);
             setDurability(getDurability() + DURABILITY_INCREASE_PER_LEVEL);
-
-
-            // setLevelUpCost(getLevelUpCost() + 10)
-            // this.attackPower = calculateInitialAttackPower(getLevel());
-
-          System.out.println("Tower upgraded to level " + getLevel());
-        } else {
-            System.out.println("Tower is already at max level (" + MAX_LEVEL_TOWER + ").");
         }
     }
 }

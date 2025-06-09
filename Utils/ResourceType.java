@@ -1,4 +1,4 @@
-package Game;
+package Utils;
 
 public enum ResourceType {
     GOLD,

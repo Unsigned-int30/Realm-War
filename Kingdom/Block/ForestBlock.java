@@ -1,37 +1,31 @@
 package Kingdom.Block;
 
-import Game.Player;
-import Game.ResourceYield;
-import Game.ResourceType;
+import Utils.ResourceYield;
+import Utils.ResourceType;
 
 public class ForestBlock extends Block {
     private static final int FOOD_YIELD_AMOUNT = 1;
-    private boolean hasForest; // وضعیتی برای اینکه آیا هنوز جنگل وجود دارد یا خیر
+    private boolean hasForest;
 
     public ForestBlock(int x, int y) {
         super(x, y);
-        this.hasForest = true; // در ابتدا جنگل وجود دارد
-    }
-
-    @Override
-    public boolean canBuildStructure() {
-        return false;
-    }
-
-    @Override
-    public ResourceYield produceResources() {
-        return null;
+        this.hasForest = true;
     }
 
     public boolean hasForest() {
         return hasForest;
     }
 
-    /**
-     * این متد زمانی فراخوانی می‌شود که سازه‌ای روی بلوک جنگلی ساخته شود
-     * و در نتیجه جنگل از بین برود.
-     */
     public void removeForest() {
         this.hasForest = false;
+    }
+
+    @Override
+    public ResourceYield produceResources() {
+        if (getOwner() != null && this.hasForest) {
+            return new ResourceYield(ResourceType.FOOD, FOOD_YIELD_AMOUNT);
+        } else {
+            return new ResourceYield(ResourceType.NONE, 0);
+        }
     }
 }

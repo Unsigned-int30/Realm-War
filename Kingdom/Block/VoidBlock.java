@@ -1,8 +1,7 @@
 package Kingdom.Block;
 
-import Game.ResourceYield;
-import Game.ResourceType;
-import Kingdom.Block.Block;
+import Utils.ResourceYield;
+import Utils.ResourceType;
 
 public class VoidBlock extends Block {
     public VoidBlock(int x, int y) {
@@ -11,6 +10,11 @@ public class VoidBlock extends Block {
 
     @Override
     public boolean canBuildStructure() {
+        return false;
+    }
+
+    @Override
+    public boolean canMoveInto() {
         return false;
     }
 

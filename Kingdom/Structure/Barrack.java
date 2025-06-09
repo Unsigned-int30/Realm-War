@@ -1,13 +1,19 @@
 package Kingdom.Structure;
+
 import Game.Player;
 
-public class Barrack extends Structure  {
-
+public class Barrack extends Structure {
+    public static final int BUILDING_COST = 30;
+    public static final int INITIAL_DURABILITY = 50;
+    public static final int MAINTENANCE_COST = 5;
+    public static final int INITIAL_LEVEL_UP_COST = 25;
+    public static final int MAX_ALLOWED = 2;
     private static final int UNIT_SPACE_PER_LEVEL = 5;
     private static final int MAX_LEVEL_BARRACK = 3;
+    private static final int DURABILITY_INCREASE_PER_LEVEL = 25;
 
-    public Barrack(int durability, Player player, int level, int maintenanceCost, int buildingCost, int levelUpCost) {
-        super(durability, player, level, maintenanceCost, buildingCost, levelUpCost);
+    public Barrack(Player owner) {
+        super(INITIAL_DURABILITY, owner, 1, MAINTENANCE_COST, BUILDING_COST, INITIAL_LEVEL_UP_COST);
     }
 
     @Override
@@ -18,12 +24,8 @@ public class Barrack extends Structure  {
     @Override
     public void upgradeLevel() {
         if (getLevel() < MAX_LEVEL_BARRACK) {
-
             setLevel(getLevel() + 1);
-            System.out.println("Barrack has been Successful Upgraded to Level "+ getLevel());
-        } else {
-            System.out.println("Barrack is already at max level (" + MAX_LEVEL_BARRACK + ").");
+            setDurability(getDurability() + DURABILITY_INCREASE_PER_LEVEL);
         }
     }
-
 }
