@@ -18,6 +18,11 @@ public class Swordman extends Unit {
     }
 
     @Override
+    public int getRank() {
+        return 3;
+    }
+
+    @Override
     public Unit merge(Unit other) {
         if (canMerge(other)) {
             // دو Swordman یک Knight می‌سازند

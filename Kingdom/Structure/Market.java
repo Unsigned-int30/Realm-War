@@ -9,7 +9,7 @@ public class Market extends Structure {
     public static final int INITIAL_LEVEL_UP_COST = 20;
     public static final int MAX_ALLOWED = 3;
     private static final int BASE_GOLD_PRODUCTION_PER_LEVEL = 5;
-    private static final int MAX_LEVEL_MARKET = 3;
+    public static final int MAX_LEVEL = 3;
     private static final int DURABILITY_INCREASE_PER_LEVEL = 20;
 
     public Market(Player owner) {
@@ -23,7 +23,7 @@ public class Market extends Structure {
 
     @Override
     public void upgradeLevel() {
-        if (getLevel() < MAX_LEVEL_MARKET) {
+        if (getLevel() < MAX_LEVEL) {
             setLevel(getLevel() + 1);
             setDurability(getDurability() + DURABILITY_INCREASE_PER_LEVEL);
         }

@@ -7,7 +7,7 @@ public class Tower extends Structure {
     public static final int INITIAL_DURABILITY = 60;
     public static final int MAINTENANCE_COST = 4;
     public static final int INITIAL_LEVEL_UP_COST = 30;
-    private static final int MAX_LEVEL_TOWER = 3;
+    public static final int MAX_LEVEL = 3;
     private static final int DURABILITY_INCREASE_PER_LEVEL = 30;
 
     public Tower(Player owner) {
@@ -20,7 +20,7 @@ public class Tower extends Structure {
 
     @Override
     public void upgradeLevel() {
-        if (getLevel() < MAX_LEVEL_TOWER) {
+        if (getLevel() < MAX_LEVEL) {
             setLevel(getLevel() + 1);
             setDurability(getDurability() + DURABILITY_INCREASE_PER_LEVEL);
         }

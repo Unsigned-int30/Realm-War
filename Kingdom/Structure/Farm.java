@@ -9,7 +9,7 @@ public class Farm extends Structure {
     public static final int INITIAL_LEVEL_UP_COST = 15;
     public static final int MAX_ALLOWED = 4;
     private static final int BASE_FOOD_PRODUCTION_PER_LEVEL = 5;
-    private static final int MAX_LEVEL_FARM = 3;
+    public static final int MAX_LEVEL = 3;
     private static final int DURABILITY_INCREASE_PER_LEVEL = 15;
 
     public Farm(Player owner) {
@@ -23,7 +23,7 @@ public class Farm extends Structure {
 
     @Override
     public void upgradeLevel() {
-        if (getLevel() < MAX_LEVEL_FARM) {
+        if (getLevel() < MAX_LEVEL) {
             setLevel(getLevel() + 1);
             setDurability(getDurability() + DURABILITY_INCREASE_PER_LEVEL);
         }

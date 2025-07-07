@@ -4,14 +4,14 @@ import Game.Player;
 
 public class TownHall extends Structure {
     private static final int PROVIDED_UNIT_SPACE = 5;
-    private static final int MAX_LEVEL_TOWNHALL = 1;
+    public static final int MAX_LEVEL = 1;
     private static final int MAINTENANCE_COST_TOWNHALL = 0;
     private static final int GOLD_PRODUCTION_TOWNHALL = 5;
     public static final int INITIAL_DURABILITY = 100;
     private static final int FOOD_PRODUCTION_TOWNHALL = 5;
 
     public TownHall(Player owner) {
-        super(INITIAL_DURABILITY, owner, MAX_LEVEL_TOWNHALL, MAINTENANCE_COST_TOWNHALL, 0, 0);
+        super(INITIAL_DURABILITY, owner, MAX_LEVEL, MAINTENANCE_COST_TOWNHALL, 0, 0);
     }
 
     @Override

@@ -17,6 +17,11 @@ public class Spearman extends Unit {
     }
 
     @Override
+    public int getRank() {
+        return 2;
+    }
+
+    @Override
     public Unit merge(Unit other) {
         if (canMerge(other)) {
             // دو Spearman یک Swordman می‌سازند

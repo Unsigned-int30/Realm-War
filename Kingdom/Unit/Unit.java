@@ -26,7 +26,7 @@ public abstract class Unit {
         this.owner = owner;
         this.block = null;
     }
-
+    public abstract int getRank();
     public int getHitPoints() { return hitPoints; }
     public int getMovementBlockRange() { return movementBlockRange; }
     public int getAttackPower() { return attackPower; }
@@ -51,8 +51,8 @@ public abstract class Unit {
     public abstract boolean canAttack(Unit target);
 
     public abstract void dealDamage(int damage);
-   // public abstract void heal(int amount);
-   // public abstract void removeUnit(Unit remove)
+    // public abstract void heal(int amount);
+    // public abstract void removeUnit(Unit remove)
 
     public boolean isAlive() {
         return this.hitPoints > 0;

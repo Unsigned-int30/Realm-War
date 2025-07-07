@@ -17,6 +17,11 @@ public class Knight extends Unit {
     }
 
     @Override
+    public int getRank() {
+        return 4;
+    }
+
+    @Override
     public Unit merge(Unit other) {
         return null;
     }

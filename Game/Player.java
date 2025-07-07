@@ -176,7 +176,7 @@ public class Player {
         for (Structure s : this.structures) { if (structureClass.isInstance(s)) { count++; } }
         return count;
     }
-            @Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

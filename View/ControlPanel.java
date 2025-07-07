@@ -6,57 +6,35 @@ import java.awt.*;
 
 public class ControlPanel extends JPanel {
     private JButton endTurnButton;
-    private JButton buildFarmButton;
-    private JButton buildMarketButton;
-    private JButton buildBarrackButton;
-    private JButton buildTowerButton;
+    private JButton buildButton;
+    private JButton produceUnitButton;
 
-    private JButton producePeasantButton;
-    private JButton produceSpearmanButton;
+    private JButton buildActionsButton;
+    private JButton unitActionsButton;
+    private JButton otherActionsButton;
+
 
     public ControlPanel() {
-        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-
-        JPanel generalActionsPanel = new JPanel();
         endTurnButton = new JButton("End Turn");
+        buildActionsButton = new JButton("Build Structure...");
+        unitActionsButton = new JButton("Unit Actions...");
+        otherActionsButton = new JButton("Other Actions...");
+
         endTurnButton.setPreferredSize(new Dimension(120, 40));
-        generalActionsPanel.add(endTurnButton);
+        buildActionsButton.setPreferredSize(new Dimension(150, 40));
+        unitActionsButton.setPreferredSize(new Dimension(150, 40));
+        otherActionsButton.setPreferredSize(new Dimension(150, 40));
 
-
-        JPanel buildActionsPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-        buildActionsPanel.setBorder(new TitledBorder("Build Actions"));
-
-        buildFarmButton = new JButton("Build Farm");
-        buildMarketButton = new JButton("Build Market");
-        buildBarrackButton = new JButton("Build Barrack");
-        buildTowerButton = new JButton("Build Tower");
-
-        buildActionsPanel.add(buildFarmButton);
-        buildActionsPanel.add(buildMarketButton);
-        buildActionsPanel.add(buildBarrackButton);
-        buildActionsPanel.add(buildTowerButton);
-
-
-        JPanel unitActionsPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-        unitActionsPanel.setBorder(new TitledBorder("Unit Actions"));
-
-        producePeasantButton = new JButton("Produce Peasant");
-        produceSpearmanButton = new JButton("Produce Spearman");
-
-        unitActionsPanel.add(producePeasantButton);
-        unitActionsPanel.add(produceSpearmanButton);
-
-        add(generalActionsPanel);
-        add(buildActionsPanel);
-        add(unitActionsPanel);
+        add(endTurnButton);
+        add(buildActionsButton);
+        add(unitActionsButton);
+        add(otherActionsButton);
     }
 
     public JButton getEndTurnButton() { return endTurnButton; }
-    public JButton getBuildFarmButton() { return buildFarmButton; }
-    public JButton getBuildMarketButton() { return buildMarketButton; }
-    public JButton getBuildBarrackButton() { return buildBarrackButton; }
-    public JButton getBuildTowerButton() { return buildTowerButton; }
-    public JButton getProducePeasantButton() { return producePeasantButton; }
-    public JButton getProduceSpearmanButton() { return produceSpearmanButton; }
+    public JButton getBuildActionsButton() { return buildActionsButton; }
+    public JButton getUnitActionsButton() { return unitActionsButton; }
+    public JButton getOtherActionsButton() { return otherActionsButton; }
 }

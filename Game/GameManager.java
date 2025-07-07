@@ -158,33 +158,95 @@ public class GameManager {
     }
 
     public void tryMoveUnit(Player player, Unit unit, Block destination) {
-        if (player != getCurrentPlayer() || unit.getOwner() != player) return;
+        if (player != getCurrentPlayer() || unit == null || unit.getOwner() != player) return;
+
         Block source = unit.getBlock();
-        if (source == null || destination == null || gameMap.getDistance(source, destination) > unit.getMovementBlockRange() || !destination.canMoveInto()) return;
+        if (source == null || destination == null) return;
+
+        if (gameMap.getDistance(source, destination) > unit.getMovementBlockRange()) {
+            return;
+        }
+
+        if (destination.hasUnit() || destination.hasStructure()) {
+            return;
+        }
+
+        if (!destination.canMoveInto()) {
+            return;
+        }
+
+
+        List<Block> neighborsOfDestination = gameMap.getAdjacentBlocks(destination);
+        for (Block neighbor : neighborsOfDestination) {
+            if (neighbor.hasStructure() && neighbor.getStructure().getOwner() != player) {
+                if (neighbor.getStructure() instanceof Tower) {
+                    Tower enemyTower = (Tower) neighbor.getStructure();
+                    if (unit.getRank() <= enemyTower.getRestrictionLevel()) {
+                        System.out.println("Move failed: Blocked by an enemy Tower!");
+                        return;
+                    }
+                }
+            }
+        }
+
         source.setUnit(null);
         destination.setUnit(unit);
         unit.setBlock(destination);
+
+        if (destination.getOwner() != player) {
+            if (destination.getOwner() != null) {
+                destination.getOwner().removeOwnedBlock(destination);
+            }
+            player.addOwnedBlock(destination);
+        }
     }
 
     public void tryAttack(Player player, Unit attacker, Block targetBlock) {
-        if (player != getCurrentPlayer() || attacker.getOwner() != player || targetBlock == null || gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) return;
+        if (player != getCurrentPlayer() || attacker.getOwner() != player || targetBlock == null) return;
+
+        if (gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) {
+            System.out.println("Attack failed: Target is out of range.");
+            return;
+        }
+
         Object target = targetBlock.getUnit() != null ? targetBlock.getUnit() : targetBlock.getStructure();
-        if (target == null) return;
+        if (target == null) {
+            System.out.println("Attack failed: No target on the selected block.");
+            return;
+        }
+
         Player targetOwner = (target instanceof Unit) ? ((Unit) target).getOwner() : ((Structure) target).getOwner();
-        if (targetOwner == player) return;
+        if (targetOwner == player) {
+            System.out.println("Attack failed: Cannot attack your own units or structures.");
+            return;
+        }
 
         int damage = attacker.getAttackPower();
-        if (attacker.getBlock() instanceof ForestBlock && ((ForestBlock) attacker.getBlock()).hasForest()) { damage = (int) (damage * 1.5); }
-        if (targetBlock instanceof ForestBlock && ((ForestBlock) targetBlock).hasForest()) { damage = (int) (damage * 0.75); }
+        // اعمال مزیت حمله از جنگل
+        if (attacker.getBlock() instanceof ForestBlock && ((ForestBlock) attacker.getBlock()).hasForest()) {
+            damage = (int) (damage * 1.5); // 50% قدرت بیشتر
+        }
+        // اعمال پنالتی حمله به هدف داخل جنگل
+        if (targetBlock instanceof ForestBlock && ((ForestBlock) targetBlock).hasForest()) {
+            damage = (int) (damage * 0.75); // 25% قدرت کمتر
+        }
 
         if (target instanceof Unit) {
             Unit targetUnit = (Unit) target;
             targetUnit.dealDamage(damage);
-            if (!targetUnit.isAlive()) { removeUnitFromGame(targetUnit); }
+            System.out.println(attacker.getClass().getSimpleName() + " attacks " + targetUnit.getClass().getSimpleName() + " for " + damage + " damage.");
+            if (!targetUnit.isAlive()) {
+                System.out.println(targetUnit.getClass().getSimpleName() + " was defeated!");
+                removeUnitFromGame(targetUnit);
+            }
         } else if (target instanceof Structure) {
             Structure targetStructure = (Structure) target;
             targetStructure.takeDamage(damage);
-            if (targetStructure.isDestroyed()) { removeStructureFromGame(targetStructure); }
+            System.out.println(attacker.getClass().getSimpleName() + " attacks " + targetStructure.getClass().getSimpleName() + " for " + damage + " damage.");
+            if (targetStructure.isDestroyed()) {
+                System.out.println(targetStructure.getClass().getSimpleName() + " was destroyed!");
+                removeStructureFromGame(targetStructure);
+            }
         }
     }
 
@@ -262,14 +324,22 @@ public class GameManager {
 
     private void removeUnitFromGame(Unit unit) {
         if (unit == null) return;
-        unit.getOwner().removeUnit(unit);
-        if (unit.getBlock() != null) { unit.getBlock().setUnit(null); }
+        if (unit.getOwner() != null) {
+            unit.getOwner().removeUnit(unit);
+        }
+        if (unit.getBlock() != null) {
+            unit.getBlock().setUnit(null);
+        }
     }
 
     private void removeStructureFromGame(Structure structure) {
         if (structure == null) return;
-        structure.getOwner().removeStructure(structure);
-        if (structure.getBlock() != null) { structure.getBlock().setStructure(null); }
+        if (structure.getOwner() != null) {
+            structure.getOwner().removeStructure(structure);
+        }
+        if (structure.getBlock() != null) {
+            structure.getBlock().setStructure(null);
+        }
     }
 }
 
