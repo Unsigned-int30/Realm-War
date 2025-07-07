@@ -29,6 +29,7 @@ public class MainPanel {
 
     public MainPanel() {
         try {
+            AssetManager.loadAssets();
             gameMap = new GameMap();
             List<Player> players = new ArrayList<>();
             players.add(new Player(0, "Player 1 (Blue)"));

@@ -7,7 +7,7 @@ import Kingdom.Block.ForestBlock;
 import Kingdom.Block.VoidBlock;
 import Kingdom.Structure.Structure;
 import Kingdom.Unit.Unit;
-
+import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import java.awt.*;
 
@@ -90,22 +90,35 @@ public class MapPanel extends JPanel {
     }
 
     private void drawStructure(Graphics2D g2d, Structure structure, int x, int y) {
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(x * CELL_SIZE + 10, y * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20);
+        String assetName = structure.getClass().getSimpleName().toLowerCase() + ".png";
+        BufferedImage img = AssetManager.getAsset(assetName);
+        if (img != null) {
+            g2d.drawImage(img, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE, null);
+        } else {
+
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(x * CELL_SIZE + 10, y * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20);
+        }
+
         if (structure.getOwner() != null) {
             g2d.setColor(getPlayerColor(structure.getOwner().getPlayerId()));
             g2d.setStroke(new BasicStroke(2));
-            g2d.drawRect(x * CELL_SIZE + 10, y * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20);
+            g2d.drawRect(x * CELL_SIZE + 2, y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
             g2d.setStroke(new BasicStroke(1));
         }
     }
 
     private void drawUnit(Graphics2D g2d, Unit unit, int x, int y) {
-        if (unit.getOwner() != null) {
-            g2d.setColor(getPlayerColor(unit.getOwner().getPlayerId()));
-            g2d.fillOval(x * CELL_SIZE + 15, y * CELL_SIZE + 15, CELL_SIZE - 30, CELL_SIZE - 30);
-            g2d.setColor(Color.BLACK);
-            g2d.drawOval(x * CELL_SIZE + 15, y * CELL_SIZE + 15, CELL_SIZE - 30, CELL_SIZE - 30);
+        String assetName = unit.getClass().getSimpleName().toLowerCase() + ".png";
+        BufferedImage img = AssetManager.getAsset(assetName);
+        if (img != null) {
+            g2d.drawImage(img, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE, null);
+        } else {
+
+            if (unit.getOwner() != null) {
+                g2d.setColor(getPlayerColor(unit.getOwner().getPlayerId()));
+                g2d.fillOval(x * CELL_SIZE + 15, y * CELL_SIZE + 15, CELL_SIZE - 30, CELL_SIZE - 30);
+            }
         }
     }
 
