@@ -14,6 +14,7 @@ public abstract class Unit {
     private int unitSpace;
     private Player owner;
     private Block block;
+    private boolean hasAttackedThisTurn;
 
     public Unit(int hitPoints, int movementBlockRange, int attackPower, int attackRange, int paymentGold, int rationFood, int unitSpace, Player owner) {
         this.hitPoints = hitPoints;
@@ -25,6 +26,7 @@ public abstract class Unit {
         this.unitSpace = unitSpace;
         this.owner = owner;
         this.block = null;
+        this.hasAttackedThisTurn = false;
     }
     public abstract int getRank();
     public int getHitPoints() { return hitPoints; }
@@ -45,6 +47,9 @@ public abstract class Unit {
             this.hitPoints = hitPoints;
         }
     }
+    public boolean hasAttackedThisTurn() {return hasAttackedThisTurn;}
+    public void setHasAttackedThisTurn(boolean hasAttacked) {this.hasAttackedThisTurn = hasAttacked;}
+    public void resetTurnActions() {this.hasAttackedThisTurn = false;}
 
     public abstract Unit merge(Unit other);
     public abstract boolean canMerge(Unit other);

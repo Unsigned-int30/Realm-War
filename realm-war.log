@@ -46,3 +46,47 @@ Jul 12, 2025 5:13:56 PM Utils.LoggerManager info
 INFO: Turn started for player 'Player 2 (Red)'.
 Jul 12, 2025 5:13:56 PM Utils.LoggerManager info
 INFO: Player 'Player 2 (Red)' collected 7 gold and 5 food.
+Jul 12, 2025 6:43:31 PM Utils.LoggerManager info
+INFO: Logger initialized successfully.
+Jul 12, 2025 6:43:32 PM Utils.LoggerManager info
+INFO: Game Started with 2 players.
+Jul 12, 2025 6:43:32 PM Utils.LoggerManager info
+INFO: Turn started for player 'Player 1 (Blue)'.
+Jul 12, 2025 6:43:32 PM Utils.LoggerManager info
+INFO: Player 'Player 1 (Blue)' collected 8 gold and 5 food.
+Jul 12, 2025 6:43:37 PM Utils.LoggerManager info
+INFO: Player 'Player 1 (Blue)' built a FARM.
+Jul 12, 2025 6:43:42 PM Utils.LoggerManager info
+INFO: Player 'Player 1 (Blue)' produced a SPEARMAN.
+Jul 12, 2025 6:43:43 PM Utils.LoggerManager info
+INFO: Unit Spearman moved to (3,1).
+Jul 12, 2025 6:43:58 PM Utils.LoggerManager info
+INFO: Unit Spearman moved to (4,1).
+Jul 12, 2025 6:44:00 PM Utils.LoggerManager info
+INFO: Unit Spearman moved to (4,2).
+Jul 12, 2025 6:44:01 PM Utils.LoggerManager info
+INFO: Unit Spearman moved to (4,3).
+Jul 12, 2025 6:44:01 PM Utils.LoggerManager info
+INFO: Player 'Player 1 (Blue)' ended their turn.
+Jul 12, 2025 6:44:01 PM Utils.LoggerManager info
+INFO: Turn started for player 'Player 2 (Red)'.
+Jul 12, 2025 6:44:01 PM Utils.LoggerManager info
+INFO: Player 'Player 2 (Red)' collected 8 gold and 5 food.
+Jul 12, 2025 6:44:08 PM Utils.LoggerManager info
+INFO: Player 'Player 2 (Red)' produced a PEASANT.
+Jul 12, 2025 6:44:09 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (7,7).
+Jul 12, 2025 6:44:10 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (7,6).
+Jul 12, 2025 6:44:10 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (7,5).
+Jul 12, 2025 6:44:12 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (6,5).
+Jul 12, 2025 6:44:13 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (5,5).
+Jul 12, 2025 6:44:13 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (5,4).
+Jul 12, 2025 6:44:14 PM Utils.LoggerManager info
+INFO: Unit Peasant moved to (4,4).
+Jul 12, 2025 6:44:15 PM Utils.LoggerManager info
+INFO: Peasant attacked Spearman for 1 damage.

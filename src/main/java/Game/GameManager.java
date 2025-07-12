@@ -101,6 +101,9 @@ public class GameManager {
 
     private void startTurnFor(Player player) {
         LoggerManager.info("Turn started for player '" + player.getPlayerName() + "'.");
+        for (Unit unit : player.getUnits()) {
+            unit.resetTurnActions();
+        }
         collectTurnResourcesForPlayer(player);
     }
 
@@ -179,7 +182,7 @@ public class GameManager {
 
         if (gameMap.getDistance(source, destination) > unit.getMovementBlockRange()) return;
         if (destination.hasUnit()) return;
-        if (destination.hasStructure() && destination.getStructure().getOwner() != player) return;
+        if (destination.hasStructure() && destination.getStructure().getOwner() != player) return; // حرکت به بلوک با ساختمان دشمن مجاز نیست
         if (!destination.canMoveInto()) return;
 
         List<Block> neighborsOfDestination = gameMap.getAdjacentBlocks(destination);
@@ -208,7 +211,10 @@ public class GameManager {
 
     public void tryAttack(Player player, Unit attacker, Block targetBlock) {
         if (player != getCurrentPlayer()) return;
-        if (attacker == null || attacker.getOwner() != player) return;
+        if (attacker.hasAttackedThisTurn()) {
+            System.out.println("Attack failed: This unit has already attacked this turn.");
+            return;
+        }
         if (targetBlock == null) return;
         if (gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) return;
 
@@ -239,6 +245,7 @@ public class GameManager {
                 removeStructureFromGame(targetStructure);
             }
         }
+        attacker.setHasAttackedThisTurn(true);
     }
 
     public void tryMergeUnits(Player player, Unit unit1, Unit unit2) {

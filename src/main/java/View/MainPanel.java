@@ -10,11 +10,13 @@ import Kingdom.Unit.Unit;
 import Utils.StructureType;
 import Utils.UnitType;
 import Utils.LoggerManager;
+import javax.swing.Timer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,9 @@ public class MainPanel {
     private GameManager gameManager;
     private Block selectedBlock;
     private Unit selectedUnit;
-
+    private Timer turnTimer;
+    private int timeLeft;
+    private final int TURN_DURATION = 30;
     public MainPanel() {
         try {
             LoggerManager.setup();
@@ -46,9 +50,11 @@ public class MainPanel {
             frame.add(mapPanel, BorderLayout.CENTER);
             frame.add(infoPanel, BorderLayout.EAST);
             frame.add(controlPanel, BorderLayout.SOUTH);
+            setupTimer();
             addListeners();
             gameManager.startGame();
             updateUI();
+            startTurnTimer();
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setResizable(false);
@@ -60,11 +66,42 @@ public class MainPanel {
         }
     }
 
+    private void setupTimer() {
+        timeLeft = TURN_DURATION;
+
+        ActionListener timerAction = e -> {
+            timeLeft--;
+            infoPanel.updateTimer(timeLeft);
+            if (timeLeft <= 0) {
+                turnTimer.stop();
+                System.out.println("Time is up! Automatically ending turn.");
+                endTurnAndReset();
+            }
+        };
+        turnTimer = new Timer(1000, timerAction);
+        turnTimer.setInitialDelay(0);
+    }
+
+    private void startTurnTimer() {
+        timeLeft = TURN_DURATION;
+        infoPanel.updateTimer(timeLeft);
+        turnTimer.restart();
+    }
+
+    private void endTurnAndReset() {
+        turnTimer.stop();
+        gameManager.endTurn();
+        clearSelection();
+        updateUI();
+
+        if (!gameManager.isGameOver()) {
+            startTurnTimer();
+        }
+    }
+
     private void addListeners() {
         controlPanel.getEndTurnButton().addActionListener(e -> {
-            gameManager.endTurn();
-            clearSelection();
-            updateUI();
+            endTurnAndReset();
         });
 
         controlPanel.getBuildActionsButton().addActionListener(e -> handleShowBuildOptions());
@@ -226,6 +263,7 @@ public class MainPanel {
     private void updateUI() {
         Player currentPlayer = gameManager.getCurrentPlayer();
         if (gameManager.isGameOver()) {
+            turnTimer.stop();
             infoPanel.updatePlayerInfo(null);
             infoPanel.updateSelectionInfo("GAME OVER");
             controlPanel.getEndTurnButton().setEnabled(false);
