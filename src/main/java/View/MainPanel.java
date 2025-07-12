@@ -9,6 +9,7 @@ import Kingdom.Structure.TownHall;
 import Kingdom.Unit.Unit;
 import Utils.StructureType;
 import Utils.UnitType;
+import Utils.LoggerManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +30,7 @@ public class MainPanel {
 
     public MainPanel() {
         try {
+            LoggerManager.setup();
             AssetManager.loadAssets();
             gameMap = new GameMap();
             List<Player> players = new ArrayList<>();
@@ -52,6 +54,7 @@ public class MainPanel {
             frame.setResizable(false);
             frame.setVisible(true);
         } catch (Exception e) {
+            LoggerManager.severe("Application startup failed: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "A critical error occurred: " + e.getMessage(), "Application Error", JOptionPane.ERROR_MESSAGE);
         }
