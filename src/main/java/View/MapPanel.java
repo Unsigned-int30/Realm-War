@@ -1,5 +1,6 @@
 package View;
 
+import View.GameMap;
 import Game.Player;
 import Kingdom.Block.Block;
 import Kingdom.Block.EmptyBlock;
@@ -7,21 +8,38 @@ import Kingdom.Block.ForestBlock;
 import Kingdom.Block.VoidBlock;
 import Kingdom.Structure.Structure;
 import Kingdom.Unit.Unit;
-import java.awt.image.BufferedImage;
+
 import javax.swing.JPanel;
-import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
+
 
 public class MapPanel extends JPanel {
     private GameMap gameMap;
     private Block selectedBlock;
     private static final int CELL_SIZE = 40;
+    private static final int DEFAULT_PANEL_SIZE = 700;
 
     public MapPanel(GameMap gameMap) {
-        this.gameMap = gameMap;
         this.selectedBlock = null;
-        int preferredWidth = gameMap.getWidth() * CELL_SIZE;
-        int preferredHeight = gameMap.getHeight() * CELL_SIZE;
-        setPreferredSize(new Dimension(preferredWidth, preferredHeight));
+        setGameMap(gameMap);
+    }
+
+    public void setGameMap(GameMap gameMap) {
+        this.gameMap = gameMap;
+        if (gameMap != null) {
+            int preferredWidth = gameMap.getWidth() * CELL_SIZE;
+            int preferredHeight = gameMap.getHeight() * CELL_SIZE;
+            setPreferredSize(new Dimension(preferredWidth, preferredHeight));
+        } else {
+            setPreferredSize(new Dimension(DEFAULT_PANEL_SIZE, DEFAULT_PANEL_SIZE));
+        }
+        revalidate();
+        repaint();
     }
 
     public void setSelectedBlock(Block block) {
@@ -36,7 +54,14 @@ public class MapPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (gameMap == null) return;
+        if (gameMap == null) {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            g.setColor(Color.WHITE);
+            g.drawString("Loading Map...", 20, 20);
+            return;
+        }
+
         Graphics2D g2d = (Graphics2D) g;
 
         for (int y = 0; y < gameMap.getHeight(); y++) {
@@ -74,7 +99,7 @@ public class MapPanel extends JPanel {
     }
 
     private Color getBlockColor(Block block) {
-        if (block instanceof EmptyBlock) return new Color(211, 211, 211, 150); // خاکستری نیمه‌شفاف
+        if (block instanceof EmptyBlock) return new Color(211, 211, 211, 150);
         if (block instanceof ForestBlock) {
             return ((ForestBlock) block).hasForest() ? new Color(34, 139, 34, 150) : new Color(139, 69, 19, 150);
         }
@@ -85,7 +110,6 @@ public class MapPanel extends JPanel {
     private Color getPlayerTerritoryColor(int playerId) {
         if (playerId == 0) return new Color(173, 216, 230);
         if (playerId == 1) return new Color(255, 182, 193);
-
         return Color.WHITE;
     }
 
@@ -95,7 +119,6 @@ public class MapPanel extends JPanel {
         if (img != null) {
             g2d.drawImage(img, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE, null);
         } else {
-
             g2d.setColor(Color.BLACK);
             g2d.fillRect(x * CELL_SIZE + 10, y * CELL_SIZE + 10, CELL_SIZE - 20, CELL_SIZE - 20);
         }
@@ -114,7 +137,6 @@ public class MapPanel extends JPanel {
         if (img != null) {
             g2d.drawImage(img, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE, null);
         } else {
-
             if (unit.getOwner() != null) {
                 g2d.setColor(getPlayerColor(unit.getOwner().getPlayerId()));
                 g2d.fillOval(x * CELL_SIZE + 15, y * CELL_SIZE + 15, CELL_SIZE - 30, CELL_SIZE - 30);

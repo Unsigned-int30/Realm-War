@@ -1,9 +1,13 @@
 package View;
 
+import Game.Player;
 import Kingdom.Block.Block;
 import Kingdom.Block.EmptyBlock;
 import Kingdom.Block.ForestBlock;
 import Kingdom.Block.VoidBlock;
+import Kingdom.Structure.Structure;
+import Kingdom.Unit.Unit;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,8 +16,8 @@ public class GameMap {
     private final int width;
     private final int height;
     private final Block[][] mapGrid;
-    private static final int DEFAULT_WIDTH = 10;
-    private static final int DEFAULT_HEIGHT = 10;
+    private static final int DEFAULT_WIDTH = 15;
+    private static final int DEFAULT_HEIGHT = 15;
 
     public GameMap() {
         this(DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -40,8 +44,13 @@ public class GameMap {
         }
     }
 
-    public int getWidth() { return width; }
-    public int getHeight() { return height; }
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 
     public Block getBlockAt(int x, int y) {
         if (isValidCoordinate(x, y)) {
@@ -57,8 +66,8 @@ public class GameMap {
     public List<Block> getAdjacentBlocks(Block block) {
         if (block == null) return Collections.emptyList();
         List<Block> neighbors = new ArrayList<>();
-        int[] dx = { -1, 1, 0, 0 };
-        int[] dy = { 0, 0, -1, 1 };
+        int[] dx = {-1, 1, 0, 0};
+        int[] dy = {0, 0, -1, 1};
         for (int i = 0; i < dx.length; i++) {
             int newX = block.getX() + dx[i];
             int newY = block.getY() + dy[i];
@@ -73,4 +82,30 @@ public class GameMap {
         if (b1 == null || b2 == null) return Integer.MAX_VALUE;
         return Math.abs(b1.getX() - b2.getX()) + Math.abs(b1.getY() - b2.getY());
     }
+
+    public void relinkAll(List<Player> players) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Block block = getBlockAt(x, y);
+                if (block == null) continue;
+
+                Player blockOwner = block.getOwner();
+
+                if (block.getStructure() != null) {
+                    Structure s = block.getStructure();
+                    s.setBlock(block);
+                    s.setOwner(blockOwner);
+                }
+
+
+                if (block.getUnit() != null) {
+                    Unit u = block.getUnit();
+                    u.setBlock(block);
+                    u.setOwner(blockOwner);
+                }
+            }
+        }
+    }
+
 }
+
