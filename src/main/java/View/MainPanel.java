@@ -71,6 +71,9 @@ public class MainPanel extends JPanel {
                     updateUI();
                     startTurnTimer();
 
+                    MusicPlayer.playBackgroundMusic();
+
+
                     parentFrame.pack();
                     parentFrame.setLocationRelativeTo(null);
 
