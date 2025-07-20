@@ -33,6 +33,40 @@ public class Player {
         this.score = 0;
     }
 
+    public int getGoldIncomePerTurn() {
+        int income = 0;
+        for (Structure s : this.structures) {
+            income += s.getGoldProductionPerTurn();
+        }
+        for (Block b : this.ownedBlocks) {
+            if (b.produceResources().getType() == Utils.ResourceType.GOLD) {
+                income += b.produceResources().getAmount();
+            }
+        }return income;
+    }
+    public int getFoodIncomePerTurn() {
+        int income = 0;
+        for (Structure s : this.structures) {
+            income += s.getFoodProductionPerTurn();}
+        for (Block b : this.ownedBlocks) {
+            if (b.produceResources().getType() == Utils.ResourceType.FOOD) {
+                income += b.produceResources().getAmount();
+            }}return income;
+    }
+    public int getGoldExpensePerTurn() {
+        int expense = 0;
+        for (Structure s : this.structures) {
+            expense += s.getMaintenanceCost();}
+        for (Unit u : this.units) {
+            expense += u.getPaymentGold();
+        }return expense;
+    }
+    public int getFoodExpensePerTurn() {
+        int expense = 0;
+        for (Unit u : this.units) {
+            expense += u.getRationFood();
+        }return expense;
+    }
     public String getPlayerName() { return playerName; }
     public int getPlayerId() { return playerId; }
     public int getGold() { return gold; }

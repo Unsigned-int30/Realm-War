@@ -3,90 +3,112 @@ package View;
 import Game.Player;
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 public class InfoPanel extends JPanel {
-    private JLabel currentPlayerLabel;
-    private JLabel player1ScoreLabel;
-    private JLabel player2ScoreLabel;
-    private JTextArea winnersHistoryArea;
-    private JLabel goldLabel;
-    private JLabel foodLabel;
-    private JLabel unitSpaceLabel;
-    private JLabel turnTimerLabel;
-    private JTextArea selectionInfoArea;
+    private JLabel currentPlayerLabel, goldLabel, foodLabel, unitSpaceLabel, turnTimerLabel, turnCountLabel;
+    private JLabel player1ScoreLabel, player2ScoreLabel;
+    private JTextArea winnersHistoryArea, selectionInfoArea;
 
     public InfoPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        setPreferredSize(new Dimension(200, 0));
+        this.setLayout(new BorderLayout());
+        this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        this.setPreferredSize(new Dimension(240, 0));
 
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
         player1ScoreLabel = new JLabel("Player 1 (Blue): 0");
         player2ScoreLabel = new JLabel("Player 2 (Red): 0");
         JPanel scoresPanel = new JPanel(new GridLayout(2, 1));
         scoresPanel.add(player1ScoreLabel);
         scoresPanel.add(player2ScoreLabel);
-        winnersHistoryArea = new JTextArea(5, 20);
+
+        winnersHistoryArea = new JTextArea(5, 15);
         winnersHistoryArea.setEditable(false);
         JScrollPane historyScroll = new JScrollPane(winnersHistoryArea);
-        add(createTitledPanel("Scores", scoresPanel));
-        add(Box.createRigidArea(new Dimension(0, 10)));
-        add(createTitledPanel("Winners History", historyScroll));
+        historyScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
 
         currentPlayerLabel = new JLabel("Player: -");
-        goldLabel = new JLabel("Gold: -");
-        foodLabel = new JLabel("Food: -");
-        unitSpaceLabel = new JLabel("Unit Space: -/-");
-
-
+        currentPlayerLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        goldLabel = new JLabel("Gold: 0 (+0)");
+        foodLabel = new JLabel("Food: 0 (+0)");
+        unitSpaceLabel = new JLabel("Unit Space: 0/0");
         turnTimerLabel = new JLabel("Time Left: --");
-
-        add(createTitledPanel("Current Player", currentPlayerLabel, goldLabel, foodLabel, unitSpaceLabel, turnTimerLabel));
-        add(Box.createRigidArea(new Dimension(0, 10)));
+        turnTimerLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        turnTimerLabel.setForeground(Color.RED);
+        turnCountLabel = new JLabel("Turn: 0 / 0");
 
         selectionInfoArea = new JTextArea("No selection.");
         selectionInfoArea.setEditable(false);
         selectionInfoArea.setLineWrap(true);
         selectionInfoArea.setWrapStyleWord(true);
-        JScrollPane scrollPane = new JScrollPane(selectionInfoArea);
-        add(createTitledPanel("Selection Info", scrollPane));
+        JScrollPane selectionScroll = new JScrollPane(selectionInfoArea);
+
+        contentPanel.add(createTitledPanel("Scores", scoresPanel));
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        contentPanel.add(createTitledPanel("Winners History", historyScroll));
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        contentPanel.add(createTitledPanel("Current Player", currentPlayerLabel, goldLabel, foodLabel, unitSpaceLabel, turnTimerLabel, turnCountLabel));
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        contentPanel.add(createTitledPanel("Selection Info", selectionScroll));
+
+        this.add(contentPanel, BorderLayout.NORTH);
     }
 
     private JPanel createTitledPanel(String title, Component... components) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createTitledBorder(title));
+        Border lineBorder = BorderFactory.createLineBorder(new Color(57, 149, 255), 1);
+        TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, " " + title + " ");
+        titledBorder.setTitleFont(new Font("Segoe UI", Font.BOLD, 12));
+        titledBorder.setTitleColor(Color.DARK_GRAY);
+        panel.setBorder(titledBorder);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         for (Component comp : components) {
-            panel.add(comp);
+            ((JComponent) comp).setAlignmentX(Component.LEFT_ALIGNMENT);
+            Box horizontalBox = Box.createHorizontalBox();
+            horizontalBox.add(Box.createRigidArea(new Dimension(5, 0)));
+            horizontalBox.add(comp);
+            horizontalBox.add(Box.createHorizontalGlue());
+            panel.add(horizontalBox);
         }
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         return panel;
     }
 
-    public void updateScores(Player player1, Player player2) {
-        if (player1 != null && player2 != null) {
-            player1ScoreLabel.setText(player1.getPlayerName() + ": " + player1.getScore());
-            player2ScoreLabel.setText(player2.getPlayerName() + ": " + player2.getScore());
-        }
+    private Color getPlayerColor(int playerId) {
+        if (playerId == 0) return Color.BLUE;
+        if (playerId == 1) return Color.RED;
+        return Color.BLACK;
     }
-
 
     public void updatePlayerInfo(Player player) {
         if (player != null) {
             currentPlayerLabel.setText("Player: " + player.getPlayerName());
-            goldLabel.setText("Gold: " + player.getGold());
-            foodLabel.setText("Food: " + player.getFood());
+            currentPlayerLabel.setForeground(getPlayerColor(player.getPlayerId()));
+            int netGold = player.getGoldIncomePerTurn() - player.getGoldExpensePerTurn();
+            int netFood = player.getFoodIncomePerTurn() - player.getFoodExpensePerTurn();
+            String goldSign = netGold >= 0 ? "+" : "";
+            String foodSign = netFood >= 0 ? "+" : "";
+            goldLabel.setText(String.format("Gold: %d (%s%d)", player.getGold(), goldSign, netGold));
+            foodLabel.setText(String.format("Food: %d (%s%d)", player.getFood(), foodSign, netFood));
             unitSpaceLabel.setText("Unit Space: " + player.getCurrentUnitSpaceUsed() + "/" + player.getMaxUnitSpace());
+        } else {
+            currentPlayerLabel.setText("GAME OVER");
+            currentPlayerLabel.setForeground(Color.BLACK);
         }
     }
 
-    public void updateSelectionInfo(String info) {
-        selectionInfoArea.setText(info);
-    }
-    public void updateTimer(int timeLeft) {
-        if (turnTimerLabel != null) {
-            turnTimerLabel.setText("Time Left: " + timeLeft);
-        }
+    public void updateScores(Player p1, Player p2) {
+        if (p1 != null) player1ScoreLabel.setText(p1.getPlayerName() + ": " + p1.getScore());
+        if (p2 != null) player2ScoreLabel.setText(p2.getPlayerName() + ": " + p2.getScore());
     }
 
-
+    public void updateWinnersHistory(String history) { winnersHistoryArea.setText(history); }
+    public void updateTimer(int timeLeft) { if (turnTimerLabel != null) turnTimerLabel.setText("Time Left: " + timeLeft); }
+    public void updateTurnInfo(int current, int max) { if (turnCountLabel != null) turnCountLabel.setText("Turn: " + current + " / " + max); }
+    public void updateSelectionInfo(String info) { selectionInfoArea.setText(info); }
 }

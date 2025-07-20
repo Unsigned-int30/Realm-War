@@ -2,6 +2,8 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +18,14 @@ public class ControlPanel extends JPanel {
 
     public ControlPanel() {
         setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        setBackground(new Color(220, 215, 215));
 
-        endTurnButton = createButton("End Turn", new Dimension(120, 40));
-        buildActionsButton = createButton("Build...", new Dimension(140, 40));
-        unitActionsButton = createButton("Unit Actions...", new Dimension(140, 40));
-        otherActionsButton = createButton("Other Actions...", new Dimension(140, 40));
-        saveButton = createButton("Save Game", new Dimension(120, 40));
-        loadButton = createButton("Load Game", new Dimension(120, 40));
+        endTurnButton = createStyledButton("End Turn");
+        buildActionsButton = createStyledButton("Build...");
+        unitActionsButton = createStyledButton("Unit Actions...");
+        otherActionsButton = createStyledButton("Other Actions...");
+        saveButton = createStyledButton("Save Game");
+        loadButton = createStyledButton("Load Game");
 
         add(endTurnButton);
         add(buildActionsButton);
@@ -32,9 +35,31 @@ public class ControlPanel extends JPanel {
         add(loadButton);
     }
 
-    private JButton createButton(String text, Dimension size) {
+    private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
-        button.setPreferredSize(size);
+
+        Color normalColor = new Color(70, 70, 80);
+        Color hoverColor = new Color(100, 100, 110);
+
+        button.setPreferredSize(new Dimension(140, 40));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(normalColor);
+        button.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 1));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
+
         allButtons.add(button);
         return button;
     }

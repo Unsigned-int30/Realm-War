@@ -107,11 +107,10 @@ public class gameRepository {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, winner.getPlayerName());
             pstmt.setInt(2, winner.getScore());
-            pstmt.setString(3, "WIN");
             pstmt.executeUpdate();
-            System.out.println("Winner's results saved successfully!");
+            LoggerManager.info("Winner's results saved successfully!");
         } catch (SQLException e) {
-            LoggerManager.info("Error saving winner result: " + e.getMessage());
+            LoggerManager.severe("Error saving winner result: " + e.getMessage());
             e.printStackTrace();
         }
     }

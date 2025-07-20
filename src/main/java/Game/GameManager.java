@@ -21,12 +21,13 @@ import java.util.stream.Collectors;
 
 public class GameManager {
     private transient InfoPanel infoPanel;
-    private int currentTurn;
-
     private List<Player> players;
     private int currentPlayerIndex;
     private GameMap gameMap;
     private boolean isGameOver;
+    private boolean gameHasEnded = false;
+    private int currentTurn = 1;
+    private static final int MAX_TURNS = 20;
 
     public boolean isGameOver() {
         return isGameOver;
@@ -81,6 +82,15 @@ public class GameManager {
     }
 
 
+    public int getCurrentTurn() {
+        return currentTurn;
+    }
+
+    public int getMaxTurns() {
+        return MAX_TURNS;
+    }
+
+
     private int countControlledBlocks(Player player) {
         int count = 0;
         for (int y = 0; y < gameMap.getHeight(); y++) {
@@ -95,34 +105,49 @@ public class GameManager {
     }
 
     public void endTurn() {
-
-
-        Player playerWhoEndedTurn = getCurrentPlayer();
-        applyMaintenanceCosts(playerWhoEndedTurn);
-
-        checkWinLossConditions();
         if (isGameOver) return;
-
+        Player playerWhoEndedTurn = getCurrentPlayer();
+        if (currentPlayerIndex == players.size() - 1) currentTurn++;
+        applyEconomicRules(playerWhoEndedTurn);
+        checkWinLossConditions();
+        if (isGameOver) {
+            if (infoPanel != null) {
+                String history = endGame();
+                infoPanel.updateWinnersHistory(history);
+            }
+            return;
+        }
         do {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         } while (players.get(currentPlayerIndex).isDefeated());
-
         startTurnFor(getCurrentPlayer());
-
-        for (Player player : players) {
-            int controlledBlocks = countControlledBlocks(player);
-            player.addScore(controlledBlocks);
-        }
-
-
-        if (infoPanel != null) {
-            infoPanel.updateScores(players.get(0), players.get(1));
-        }
-
-
     }
 
+    private void applyEconomicRules(Player player) {
+        if (player.getFoodIncomePerTurn() < player.getFoodExpensePerTurn()) {
+            LoggerManager.warning("Food deficit for " + player.getPlayerName() + ". Units are starving.");
+            for (Unit unit : new ArrayList<>(player.getUnits())) {
+                unit.takeDamage(1);
+                if (!unit.isAlive()) {
+                    LoggerManager.info(unit.getClass().getSimpleName() + " starved to death.");
+                    removeUnitFromGame(unit);
+                }
+            }
+        }
+        collectTurnResourcesForPlayer(player);
+        applyMaintenanceCosts(player);
+    }
+
+
     private void startTurnFor(Player player) {
+        LoggerManager.info("Turn started for player '" + player.getPlayerName() + "'.");
+
+        if (player.getUnits() != null) {
+            for (Unit unit : player.getUnits()) {
+                unit.resetTurnActions();
+            }
+        }
+
         collectTurnResourcesForPlayer(player);
     }
 
@@ -171,50 +196,68 @@ public class GameManager {
     }
 
     private void checkWinLossConditions() {
+        if (currentTurn > MAX_TURNS) {
+            isGameOver = true;
+            LoggerManager.info("Turn limit reached. Determining winner by score.");
+
+            Player winner = null;
+            int maxScore = -1;
+            for (Player p : players) {
+                if (p.getScore() > maxScore) {
+                    maxScore = p.getScore();
+                    winner = p;
+                }
+            }
+
+            if (winner != null) {
+                for (Player p : players) {
+                    if (p != winner) {
+                        p.setDefeated(true);
+                    }
+                }
+            }
+            return;
+        }
+
         for (Player player : players) {
             if (!player.isDefeated() && (player.getTownHall() == null || player.getTownHall().isDestroyed())) {
                 player.setDefeated(true);
+                LoggerManager.info("Player '" + player.getPlayerName() + "' has been defeated!");
             }
         }
         List<Player> activePlayers = players.stream().filter(p -> !p.isDefeated()).collect(Collectors.toList());
         if (activePlayers.size() <= 1) {
             isGameOver = true;
-            if (activePlayers.size() == 1) {
-                System.out.println("Game Over! The winner is " + activePlayers.get(0).getPlayerName());
-            } else {
-                System.out.println("Game Over! It's a draw!");
-            }
         }
     }
 
     public void tryMoveUnit(Player player, Unit unit, Block destination) {
         if (player != getCurrentPlayer() || unit == null || unit.getOwner() != player) return;
-
+        if (!unit.canMove()) {
+            System.out.println("Move failed: Unit has no moves left this turn.");
+            return;
+        }
         Block source = unit.getBlock();
         if (source == null || destination == null) return;
-
         if (gameMap.getDistance(source, destination) > unit.getMovementBlockRange()) {
+            System.out.println("Move failed: Destination is out of range.");
             return;
         }
-
-        if (destination.hasUnit() || destination.hasStructure()) {
+        if ((destination.hasUnit() && destination.getUnit().getOwner() != player) || (destination.hasStructure() && destination.getStructure().getOwner() != player)) {
+            System.out.println("Move failed: Destination is occupied by an enemy. Attack instead.");
             return;
         }
-
         if (!destination.canMoveInto()) {
+            System.out.println("Move failed: Destination is invalid or occupied by your own unit.");
             return;
         }
-
-
         List<Block> neighborsOfDestination = gameMap.getAdjacentBlocks(destination);
         for (Block neighbor : neighborsOfDestination) {
-            if (neighbor.hasStructure() && neighbor.getStructure().getOwner() != player) {
-                if (neighbor.getStructure() instanceof Tower) {
-                    Tower enemyTower = (Tower) neighbor.getStructure();
-                    if (unit.getRank() <= enemyTower.getRestrictionLevel()) {
-                        System.out.println("Move failed: Blocked by an enemy Tower!");
-                        return;
-                    }
+            if (neighbor.hasStructure() && neighbor.getStructure().getOwner() != player && neighbor.getStructure() instanceof Tower) {
+                Tower enemyTower = (Tower) neighbor.getStructure();
+                if (unit.getRank() <= enemyTower.getRestrictionLevel()) {
+                    System.out.println("Move failed: Blocked by an enemy Tower!");
+                    return;
                 }
             }
         }
@@ -222,75 +265,72 @@ public class GameManager {
         source.setUnit(null);
         destination.setUnit(unit);
         unit.setBlock(destination);
-
+        unit.incrementMovesMade();
         if (destination.getOwner() != player) {
-            if (destination.getOwner() != null) {
-                destination.getOwner().removeOwnedBlock(destination);
-            }
+            if (destination.getOwner() != null) destination.getOwner().removeOwnedBlock(destination);
             player.addOwnedBlock(destination);
         }
+        LoggerManager.info("Unit " + unit.getClass().getSimpleName() + " moved to (" + destination.getX() + "," + destination.getY() + ").");
     }
 
     public void tryAttack(Player player, Unit attacker, Block targetBlock) {
-        if (player != getCurrentPlayer() || attacker.getOwner() != player || targetBlock == null) return;
-
-        if (gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) {
-            System.out.println("Attack failed: Target is out of range.");
+        if (player != getCurrentPlayer() || attacker == null || attacker.getOwner() != player) return;
+        if (attacker.hasAttackedThisTurn()) {
+            System.out.println("Attack failed: This unit has already attacked this turn.");
             return;
         }
-
+        if (targetBlock == null || gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) return;
         Object target = targetBlock.getUnit() != null ? targetBlock.getUnit() : targetBlock.getStructure();
-        if (target == null) {
-            System.out.println("Attack failed: No target on the selected block.");
-            return;
-        }
-
+        if (target == null) return;
         Player targetOwner = (target instanceof Unit) ? ((Unit) target).getOwner() : ((Structure) target).getOwner();
-        if (targetOwner == player) {
-            System.out.println("Attack failed: Cannot attack your own units or structures.");
-            return;
-        }
+        if (targetOwner == player) return;
 
         int damage = attacker.getAttackPower();
+        if (attacker.getBlock() instanceof ForestBlock && ((ForestBlock) attacker.getBlock()).hasForest()) damage = (int) (damage * 1.5);
+        if (targetBlock instanceof ForestBlock && ((ForestBlock) targetBlock).hasForest()) damage = (int) (damage * 0.75);
 
-        if (attacker.getBlock() instanceof ForestBlock && ((ForestBlock) attacker.getBlock()).hasForest()) {
-            damage = (int) (damage * 1.5); // 50% قدرت بیشتر
-        }
-
-        if (targetBlock instanceof ForestBlock && ((ForestBlock) targetBlock).hasForest()) {
-            damage = (int) (damage * 0.75); // 25% قدرت کمتر
-        }
-
+        String attackMessage = "";
         if (target instanceof Unit) {
             Unit targetUnit = (Unit) target;
             targetUnit.takeDamage(damage);
-            System.out.println(attacker.getClass().getSimpleName() + " attacks " + targetUnit.getClass().getSimpleName() + " for " + damage + " damage.");
+            attackMessage = String.format("%s attacks %s for %d damage.", attacker.getClass().getSimpleName(), targetUnit.getClass().getSimpleName(), damage);
             if (!targetUnit.isAlive()) {
-                System.out.println(targetUnit.getClass().getSimpleName() + " was defeated!");
+                attackMessage += "\n" + targetUnit.getClass().getSimpleName() + " was defeated!";
                 removeUnitFromGame(targetUnit);
             }
         } else if (target instanceof Structure) {
             Structure targetStructure = (Structure) target;
             targetStructure.takeDamage(damage);
-            System.out.println(attacker.getClass().getSimpleName() + " attacks " + targetStructure.getClass().getSimpleName() + " for " + damage + " damage.");
+            attackMessage = String.format("%s attacks %s for %d damage.", attacker.getClass().getSimpleName(), targetStructure.getClass().getSimpleName(), damage);
             if (targetStructure.isDestroyed()) {
-                System.out.println(targetStructure.getClass().getSimpleName() + " was destroyed!");
+                attackMessage += "\n" + targetStructure.getClass().getSimpleName() + " was destroyed!";
                 removeStructureFromGame(targetStructure);
             }
         }
+        attacker.setHasAttackedThisTurn(true);
+        System.out.println(attackMessage); // چاپ نتیجه در کنسول
+        LoggerManager.info(attackMessage.replace("\n", " "));
     }
-
     public void tryMergeUnits(Player player, Unit unit1, Unit unit2) {
-        if (player != getCurrentPlayer() || unit1.getOwner() != player || unit2.getOwner() != player || gameMap.getDistance(unit1.getBlock(), unit2.getBlock()) > 1 || !unit1.canMerge(unit2))
+        if (player != getCurrentPlayer() || unit1 == null || unit2 == null || !unit1.canMerge(unit2)) {
+            System.out.println("Merge failed: These units cannot be merged.");
             return;
+        }
+        if (gameMap.getDistance(unit1.getBlock(), unit2.getBlock()) > 1) {
+            System.out.println("Merge failed: Units must be adjacent.");
+            return;
+        }
         Unit newUnit = unit1.merge(unit2);
         if (newUnit != null) {
             Block position = unit1.getBlock();
+            String message = "Units merged into a " + newUnit.getClass().getSimpleName() + ".";
             removeUnitFromGame(unit1);
             removeUnitFromGame(unit2);
             player.addUnit(newUnit);
             position.setUnit(newUnit);
             newUnit.setBlock(position);
+            System.out.println(message);
+            LoggerManager.info(message);
         }
     }
 
@@ -347,6 +387,7 @@ public class GameManager {
         if (player.canAfford(structureToUpgrade.getLevelUpCost(), 0)) {
             player.payCost(structureToUpgrade.getLevelUpCost(), 0);
             structureToUpgrade.upgradeLevel();
+            System.out.println("Structure " + structureToUpgrade.getClass().getSimpleName() + " upgraded.");
         }
     }
 
@@ -455,25 +496,24 @@ public class GameManager {
     }
 
 
-    public void endGame() {
+    public String endGame() {
         calculateScores();
-
 
         Player winner = players.stream()
                 .filter(p -> !p.isDefeated())
                 .findFirst()
                 .orElse(null);
 
-
         if (winner != null) {
             gameRepository.saveWinner(winner);
-            showGameOverDialog(winner);
+            String message = String.format("Game Over! Winner: %s (Score: %d)", winner.getPlayerName(), winner.getScore());
+            LoggerManager.info(message);
+        } else {
+            LoggerManager.info("Game Over! It's a draw.");
         }
 
-
-        if (infoPanel != null) {
-            infoPanel.updateScores(players.get(0), players.get(1));
-        }
+        String history = gameRepository.getLastWinners();
+        return history;
     }
 
 

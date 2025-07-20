@@ -21,7 +21,7 @@ import java.awt.BasicStroke;
 public class MapPanel extends JPanel {
     private GameMap gameMap;
     private Block selectedBlock;
-    private static final int CELL_SIZE = 40;
+    private static final int CELL_SIZE = 45;
     private static final int DEFAULT_PANEL_SIZE = 700;
 
     public MapPanel(GameMap gameMap) {

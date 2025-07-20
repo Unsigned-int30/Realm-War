@@ -19,8 +19,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainPanel {
-    private JFrame frame;
+public class MainPanel extends JPanel {
+    private JFrame parentFrame;
     private GameMap gameMap;
     private MapPanel mapPanel;
     private InfoPanel infoPanel;
@@ -32,30 +32,17 @@ public class MainPanel {
     private int timeLeft;
     private final int TURN_DURATION = 30;
 
-    public MainPanel() {
-        setupInitialUI();
-        infoPanel.updateSelectionInfo("Initializing game, please wait...");
+    public MainPanel(JFrame parentFrame) {
+        this.parentFrame = parentFrame;
+        this.setLayout(new BorderLayout(10, 0));
+        JLabel loadingLabel = new JLabel("Initializing Game, Please Wait...", SwingConstants.CENTER);
+        loadingLabel.setFont(new Font("Serif", Font.BOLD, 24));
+        this.add(loadingLabel, BorderLayout.CENTER);
+
         loadGameInBackground();
     }
 
-    private void setupInitialUI() {
-        mapPanel = new MapPanel(null);
-        infoPanel = new InfoPanel();
-        controlPanel = new ControlPanel();
-        frame = new JFrame("Realm War");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout(10, 0));
-        frame.add(mapPanel, BorderLayout.CENTER);
-        frame.add(infoPanel, BorderLayout.EAST);
-        frame.add(controlPanel, BorderLayout.SOUTH);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setVisible(true);
-    }
-
     private void loadGameInBackground() {
-        controlPanel.setAllButtonsEnabled(false);
         SwingWorker<GameManager, Void> worker = new SwingWorker<>() {
             @Override
             protected GameManager doInBackground() throws Exception {
@@ -74,21 +61,40 @@ public class MainPanel {
                 try {
                     gameManager = get();
                     gameMap = gameManager.getGameMap();
-                    mapPanel.setGameMap(gameMap);
+
+                    setupGameUI();
+
                     gameManager.setInfoPanel(infoPanel);
                     addListeners();
                     setupTimer();
                     gameManager.startGame();
                     updateUI();
                     startTurnTimer();
+
+                    parentFrame.pack();
+                    parentFrame.setLocationRelativeTo(null);
+
                 } catch (Exception e) {
                     handleFatalError(e, "Application failed to start.");
-                } finally {
-                    controlPanel.setAllButtonsEnabled(true);
                 }
             }
         };
         worker.execute();
+    }
+
+    private void setupGameUI() {
+        this.removeAll();
+
+        mapPanel = new MapPanel(gameMap);
+        infoPanel = new InfoPanel();
+        controlPanel = new ControlPanel();
+
+        this.add(mapPanel, BorderLayout.CENTER);
+        this.add(infoPanel, BorderLayout.EAST);
+        this.add(controlPanel, BorderLayout.SOUTH);
+
+        this.revalidate();
+        this.repaint();
     }
 
     private void addListeners() {
@@ -118,7 +124,8 @@ public class MainPanel {
             boolean isFriendlyUnitTarget = targetUnit != null && targetUnit.getOwner() == currentPlayer && selectedUnit != targetUnit;
             boolean isEnemyBlock = clickedBlock.getOwner() != null && clickedBlock.getOwner() != currentPlayer;
             boolean isTargetDefended = clickedBlock.hasUnit() || clickedBlock.hasStructure();
-            if (isFriendlyUnitTarget && selectedUnit.canMerge(targetUnit)) {
+
+            if (isFriendlyUnitTarget) {
                 gameManager.tryMergeUnits(currentPlayer, selectedUnit, targetUnit);
             } else if (isEnemyBlock && isTargetDefended) {
                 gameManager.tryAttack(currentPlayer, selectedUnit, clickedBlock);
@@ -137,9 +144,9 @@ public class MainPanel {
     }
 
     private void handleSaveGame() {
-        String saveName = JOptionPane.showInputDialog(frame, "Enter a name for your save:", "Save Game", JOptionPane.PLAIN_MESSAGE);
+        String saveName = JOptionPane.showInputDialog(parentFrame, "Enter a name for your save:", "Save Game", JOptionPane.PLAIN_MESSAGE);
         if (saveName == null || saveName.trim().isEmpty()) return;
-        infoPanel.updateSelectionInfo("Saving game as '" + saveName + "'...");
+        infoPanel.updateSelectionInfo("Saving game...");
         controlPanel.setAllButtonsEnabled(false);
         SwingWorker<Void, Void> saveWorker = new SwingWorker<>() {
             @Override
@@ -151,7 +158,7 @@ public class MainPanel {
             protected void done() {
                 try {
                     get();
-                    JOptionPane.showMessageDialog(frame, "Game saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(parentFrame, "Game saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception e) {
                     handleFatalError(e, "Failed to save game.");
                 } finally {
@@ -163,13 +170,16 @@ public class MainPanel {
     }
 
     private void handleLoadGame() {
-        String saveName = JOptionPane.showInputDialog(frame, "Enter the Save Name to load:", "Load Game", JOptionPane.PLAIN_MESSAGE);
+        String saveName = JOptionPane.showInputDialog(parentFrame, "Enter the Save Name to load:", "Load Game", JOptionPane.PLAIN_MESSAGE);
         if (saveName == null || saveName.trim().isEmpty()) return;
+
         infoPanel.updateSelectionInfo("Loading game '" + saveName + "'...");
         controlPanel.setAllButtonsEnabled(false);
+
         SwingWorker<GameManager, Void> loadWorker = new SwingWorker<>() {
             @Override
-            protected GameManager doInBackground() {
+            protected GameManager doInBackground() throws Exception {
+
                 return gameRepository.loadGame(saveName);
             }
             @Override
@@ -177,19 +187,23 @@ public class MainPanel {
                 try {
                     GameManager loadedGame = get();
                     if (loadedGame != null) {
+
                         gameManager = loadedGame;
                         gameMap = gameManager.getGameMap();
                         mapPanel.setGameMap(gameMap);
+
                         gameManager.setInfoPanel(infoPanel);
-                        JOptionPane.showMessageDialog(frame, "Game loaded successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                        JOptionPane.showMessageDialog(parentFrame, "Game loaded successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(frame, "Could not find save: " + saveName, "Load Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(parentFrame, "Could not find save: " + saveName, "Load Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception e) {
                     handleFatalError(e, "Failed to load game.");
                 } finally {
                     clearSelection();
                     updateUI();
+                    parentFrame.pack();
                 }
             }
         };
@@ -197,7 +211,7 @@ public class MainPanel {
     }
 
     private void handleShowOtherActions() {
-        if (selectedBlock == null) { JOptionPane.showMessageDialog(frame, "Please make a selection first.", "Action Error", JOptionPane.ERROR_MESSAGE); return; }
+        if (selectedBlock == null) { JOptionPane.showMessageDialog(parentFrame, "Please make a selection first.", "Action Error", JOptionPane.ERROR_MESSAGE); return; }
         ArrayList<String> options = new ArrayList<>();
         if (selectedBlock.hasStructure() && selectedBlock.getStructure().getOwner() == gameManager.getCurrentPlayer()) {
             Structure s = selectedBlock.getStructure();
@@ -210,8 +224,8 @@ public class MainPanel {
                 options.add("Upgrade (Cost: " + s.getLevelUpCost() + " Gold)");
             }
         }
-        if (options.isEmpty()) { JOptionPane.showMessageDialog(frame, "No special actions available.", "Info", JOptionPane.INFORMATION_MESSAGE); return; }
-        String choice = (String) JOptionPane.showInputDialog(frame, "Choose an action:", "Other Actions", JOptionPane.PLAIN_MESSAGE, null, options.toArray(), options.get(0));
+        if (options.isEmpty()) { JOptionPane.showMessageDialog(parentFrame, "No special actions available.", "Info", JOptionPane.INFORMATION_MESSAGE); return; }
+        String choice = (String) JOptionPane.showInputDialog(parentFrame, "Choose an action:", "Other Actions", JOptionPane.PLAIN_MESSAGE, null, options.toArray(), options.get(0));
         if (choice != null && choice.startsWith("Upgrade")) {
             gameManager.tryUpgradeStructure(gameManager.getCurrentPlayer(), selectedBlock.getStructure());
             updateUI();
@@ -219,9 +233,9 @@ public class MainPanel {
     }
 
     private void handleShowBuildOptions() {
-        if (selectedBlock == null) { JOptionPane.showMessageDialog(frame, "Please select a block first.", "Build Error", JOptionPane.ERROR_MESSAGE); return; }
+        if (selectedBlock == null) { JOptionPane.showMessageDialog(parentFrame, "Please select a block first.", "Build Error", JOptionPane.ERROR_MESSAGE); return; }
         StructureType[] buildOptions = StructureType.values();
-        StructureType choice = (StructureType) JOptionPane.showInputDialog(frame, "Choose a structure to build:", "Build Structure", JOptionPane.PLAIN_MESSAGE, null, buildOptions, buildOptions[0]);
+        StructureType choice = (StructureType) JOptionPane.showInputDialog(parentFrame, "Choose a structure to build:", "Build Structure", JOptionPane.PLAIN_MESSAGE, null, buildOptions, buildOptions[0]);
         if (choice != null) {
             gameManager.tryBuildStructure(gameManager.getCurrentPlayer(), choice, selectedBlock.getX(), selectedBlock.getY());
             clearSelection();
@@ -230,11 +244,11 @@ public class MainPanel {
     }
 
     private void handleShowUnitOptions() {
-        if (selectedBlock == null || !selectedBlock.hasStructure()) { JOptionPane.showMessageDialog(frame, "Please select a production building.", "Production Error", JOptionPane.ERROR_MESSAGE); return; }
+        if (selectedBlock == null || !selectedBlock.hasStructure()) { JOptionPane.showMessageDialog(parentFrame, "Please select a production building.", "Production Error", JOptionPane.ERROR_MESSAGE); return; }
         Structure productionBuilding = selectedBlock.getStructure();
-        if (!(productionBuilding instanceof TownHall || productionBuilding instanceof Barrack)) { JOptionPane.showMessageDialog(frame, "This building cannot produce units.", "Production Error", JOptionPane.ERROR_MESSAGE); return; }
+        if (!(productionBuilding instanceof TownHall || productionBuilding instanceof Barrack)) { JOptionPane.showMessageDialog(parentFrame, "This building cannot produce units.", "Production Error", JOptionPane.ERROR_MESSAGE); return; }
         UnitType[] produceOptions = UnitType.values();
-        UnitType choice = (UnitType) JOptionPane.showInputDialog(frame, "Choose a unit to produce:", "Produce Unit", JOptionPane.PLAIN_MESSAGE, null, produceOptions, produceOptions[0]);
+        UnitType choice = (UnitType) JOptionPane.showInputDialog(parentFrame, "Choose a unit to produce:", "Produce Unit", JOptionPane.PLAIN_MESSAGE, null, produceOptions, produceOptions[0]);
         if (choice != null) {
             gameManager.tryProduceUnit(gameManager.getCurrentPlayer(), choice, productionBuilding);
             clearSelection();
@@ -274,45 +288,46 @@ public class MainPanel {
         }
     }
 
-    private void updateUI() {
+    public void updateUI() {
         if (gameManager == null) return;
         Player currentPlayer = gameManager.getCurrentPlayer();
         controlPanel.setAllButtonsEnabled(!gameManager.isGameOver());
+
         if (gameManager.isGameOver()) {
             infoPanel.updatePlayerInfo(null);
             infoPanel.updateSelectionInfo("GAME OVER");
+            String history = gameManager.endGame();
+            infoPanel.updateWinnersHistory(history);
         } else {
             infoPanel.updatePlayerInfo(currentPlayer);
+            if (gameManager.getPlayers().size() >= 2) {
+                infoPanel.updateScores(gameManager.getPlayers().get(0), gameManager.getPlayers().get(1));
+            }
+            infoPanel.updateTurnInfo(gameManager.getCurrentTurn(), gameManager.getMaxTurns());
             updateButtonStates();
         }
-        mapPanel.refreshView();
+
+        if (mapPanel != null) {
+            mapPanel.refreshView();
+        }
     }
 
     private void updateButtonStates() {
         Player currentPlayer = gameManager.getCurrentPlayer();
-        if (currentPlayer == null) return;
-
+        if (currentPlayer == null || controlPanel == null) return;
         controlPanel.setAllButtonsEnabled(true);
-
         boolean canBuild = selectedBlock != null && selectedBlock.getOwner() == currentPlayer && !selectedBlock.hasStructure();
         controlPanel.getBuildActionsButton().setEnabled(canBuild);
-
         boolean canProduce = false;
         boolean canDoOtherActions = false;
-
         if (selectedBlock != null && selectedBlock.getOwner() == currentPlayer) {
             if (selectedBlock.hasStructure()) {
                 Structure s = selectedBlock.getStructure();
-                if (s instanceof TownHall || s instanceof Barrack) {
-                    canProduce = true;
-                }
+                if (s instanceof TownHall || s instanceof Barrack) canProduce = true;
                 canDoOtherActions = true;
             }
-            if (selectedBlock.hasUnit()) {
-                canDoOtherActions = true;
-            }
+            if (selectedBlock.hasUnit()) canDoOtherActions = true;
         }
-
         controlPanel.getUnitActionsButton().setEnabled(canProduce);
         controlPanel.getOtherActionsButton().setEnabled(canDoOtherActions);
     }
@@ -324,9 +339,11 @@ public class MainPanel {
         updateSelectionInfoPanel();
     }
 
+
+
     private void updateSelectionInfoPanel() {
-        if (selectedBlock == null) {
-            infoPanel.updateSelectionInfo("No selection.");
+        if (infoPanel == null || selectedBlock == null) {
+            if(infoPanel != null) infoPanel.updateSelectionInfo("No selection.");
             return;
         }
         StringBuilder info = new StringBuilder();
@@ -353,10 +370,6 @@ public class MainPanel {
     private void handleFatalError(Exception e, String message) {
         LoggerManager.severe(message + ": " + e.getMessage());
         e.printStackTrace();
-        JOptionPane.showMessageDialog(frame, message, "Critical Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainPanel::new);
+        JOptionPane.showMessageDialog(parentFrame, message, "Critical Error", JOptionPane.ERROR_MESSAGE);
     }
 }
