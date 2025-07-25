@@ -12,12 +12,12 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+// برچسب بندی اشیاء داخل Kingdom برای کار با Gson
 public final class RuntimeTypeAdapter<T> implements TypeAdapterFactory {
-    private final Class<?> baseType;
-    private final String typeFieldName;
-    private final Map<String, Class<?>> labelToSubtype = new LinkedHashMap<>();
-    private final Map<Class<?>, String> subtypeToLabel = new LinkedHashMap<>();
+    private final Class<?> baseType; // کلاس والد
+    private final String typeFieldName; // نام برچسب
+    private final Map<String, Class<?>> labelToSubtype = new LinkedHashMap<>(); // ترجمه از برچسب به کلاس
+    private final Map<Class<?>, String> subtypeToLabel = new LinkedHashMap<>(); // ترجمه از کلاس به برچسب
 
     private RuntimeTypeAdapter(Class<?> baseType, String typeFieldName) {
         if (typeFieldName == null || baseType == null) {
@@ -26,7 +26,7 @@ public final class RuntimeTypeAdapter<T> implements TypeAdapterFactory {
         this.baseType = baseType;
         this.typeFieldName = typeFieldName;
     }
-
+    // چون سازنده پرایوته ، باید برای ساخت شیء جدید از این کلاس از متد of استفاده کنیم
     public static <T> RuntimeTypeAdapter<T> of(Class<T> baseType, String typeFieldName) {
         return new RuntimeTypeAdapter<>(baseType, typeFieldName);
     }
@@ -65,12 +65,12 @@ public final class RuntimeTypeAdapter<T> implements TypeAdapterFactory {
             labelToDelegate.put(entry.getKey(), delegate);
             subtypeToDelegate.put(entry.getValue(), delegate);
         }
-
+        // خواندن و نوشتن
         return new TypeAdapter<R>() {
             @Override
             public R read(JsonReader in) throws IOException {
                 JsonElement jsonElement = jsonElementAdapter.read(in);
-                JsonElement labelJsonElement = jsonElement.getAsJsonObject().remove(typeFieldName);
+                JsonElement labelJsonElement = jsonElement.getAsJsonObject().remove(typeFieldName); // برچسب رو پیدا میکنه از جیسون و از بقیه جدا میکنه
                 if (labelJsonElement == null) {
                     throw new JsonParseException("cannot deserialize " + baseType
                             + " because it does not define a field named " + typeFieldName);
@@ -87,7 +87,7 @@ public final class RuntimeTypeAdapter<T> implements TypeAdapterFactory {
 
             @Override
             public void write(JsonWriter out, R value) throws IOException {
-                Class<?> srcType = value.getClass();
+                Class<?> srcType = value.getClass(); // کلاس اصلی اون برچسب رو پیدا میکنه
                 String label = subtypeToLabel.get(srcType);
                 @SuppressWarnings("unchecked")
                 TypeAdapter<R> delegate = (TypeAdapter<R>) subtypeToDelegate.get(srcType);

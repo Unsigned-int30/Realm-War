@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
-
+// پنل منوی اصلی بازی
 public class MainMenuPanel extends JPanel {
     private JButton newGameButton;
     private JButton exitButton;
@@ -25,7 +25,7 @@ public class MainMenuPanel extends JPanel {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.insets = new Insets(20, 0, 20, 0);
+        gbc.insets = new Insets(20, 0, 20, 0); // یه حاشیه و فاصله از بالا و پایین اضافه میکنه
 
         JLabel titleLabel = new JLabel("Realm War");
         titleLabel.setFont(new Font("Serif", Font.BOLD, 72));
@@ -44,7 +44,6 @@ public class MainMenuPanel extends JPanel {
     private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
 
-
         Color normalColor = new Color(25, 25, 80, 200);
         Color hoverColor = new Color(50, 50, 150, 220);
         Color borderColor = new Color(255, 150, 206);
@@ -54,8 +53,8 @@ public class MainMenuPanel extends JPanel {
         button.setForeground(Color.WHITE);
         button.setBackground(normalColor);
         button.setBorder(BorderFactory.createLineBorder(borderColor, 2));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
+        button.setFocusPainted(false); // نقطه چین کنارش رو غیر فعال میکنه
+        button.setOpaque(false); // شفاف باشه
         button.setContentAreaFilled(true);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -78,7 +77,7 @@ public class MainMenuPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (backgroundImage != null) {
-            g.drawImage(backgroundImage, 0, 0, this.getWidth(), this.getHeight(), this);
+            g.drawImage(backgroundImage, 0, 0, this.getWidth(), this.getHeight(), this); // کل پنل رو بگیره
         }
     }
 

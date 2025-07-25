@@ -2,7 +2,7 @@ package Utils;
 
 // برای مشخص کردن تایپ منابع استفاده میشه
 public class ResourceYield {
-    private final ResourceType type;
+    private final ResourceType type; // (GOLD, FOOD, NONE)
     private final int amount;
 
     public ResourceYield(ResourceType type, int amount) {
@@ -18,6 +18,7 @@ public class ResourceYield {
         return amount;
     }
 
+    // برای جلوگیری از چاپ هش کد منبع اورراید شده
     @Override
     public String toString() {
         if (type == ResourceType.NONE || amount == 0) {

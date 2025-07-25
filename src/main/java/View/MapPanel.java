@@ -62,7 +62,7 @@ public class MapPanel extends JPanel {
             return;
         }
 
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g; // برای دسترسی به تنظیمات پیشرفته تر
 
         for (int y = 0; y < gameMap.getHeight(); y++) {
             for (int x = 0; x < gameMap.getWidth(); x++) {
@@ -85,12 +85,12 @@ public class MapPanel extends JPanel {
                     drawUnit(g2d, currentBlock.getUnit(), x, y);
                 }
 
-                g2d.setColor(Color.DARK_GRAY);
+                g2d.setColor(Color.DARK_GRAY); // کشیدن کادر دور خونه ها
                 g2d.drawRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
                 if (currentBlock == selectedBlock) {
                     g2d.setColor(Color.YELLOW);
-                    g2d.setStroke(new BasicStroke(3));
+                    g2d.setStroke(new BasicStroke(3)); // استفاده از خط ضخیم تر
                     g2d.drawRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 3, CELL_SIZE - 3);
                     g2d.setStroke(new BasicStroke(1));
                 }

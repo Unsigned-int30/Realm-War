@@ -21,9 +21,16 @@ public abstract class Structure {
         this.levelUpCost = levelUpCost;
         setOwner(player);
     }
-    public void setOwner(Player owner) { this.owner = owner; this.ownerId = (owner != null) ? owner.getPlayerId() : -1; }
+    public void setOwner(Player owner) {
+        this.owner = owner;
+        if (owner != null) {
+            this.ownerId = owner.getPlayerId();
+        } else {
+            this.ownerId = -1;
+        }
+    }
     public int getDurability() { return durability; }
-    public void setDurability(int d) { this.durability = d > 0 ? d : 0; }
+    public void setDurability(int d) { this.durability = d > 0 ? d : 0; } // برای منفی نشدن جان ساختمان
     public int getOwnerId() { return ownerId; }
     public Player getOwner() { return owner; }
     public int getLevel() { return level; }

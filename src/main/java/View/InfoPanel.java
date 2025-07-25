@@ -16,8 +16,8 @@ public class InfoPanel extends JPanel {
         this.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         this.setPreferredSize(new Dimension(240, 0));
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        JPanel contentPanel = new JPanel(); // یک پنل داخلی برای نگهداری محتوا
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS)); // برای چیدمان عمودی و زیر هم
 
         player1ScoreLabel = new JLabel("Player 1 (Blue): 0");
         player2ScoreLabel = new JLabel("Player 2 (Red): 0");
@@ -42,12 +42,12 @@ public class InfoPanel extends JPanel {
 
         selectionInfoArea = new JTextArea("No selection.");
         selectionInfoArea.setEditable(false);
-        selectionInfoArea.setLineWrap(true);
+        selectionInfoArea.setLineWrap(true); // شکستن خطوط طولانی
         selectionInfoArea.setWrapStyleWord(true);
         JScrollPane selectionScroll = new JScrollPane(selectionInfoArea);
 
         contentPanel.add(createTitledPanel("Scores", scoresPanel));
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 5))); // ایجاد یک فاصله عمودی
         contentPanel.add(createTitledPanel("Winners History", historyScroll));
         contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         contentPanel.add(createTitledPanel("Current Player", currentPlayerLabel, goldLabel, foodLabel, unitSpaceLabel, turnTimerLabel, turnCountLabel));
@@ -60,7 +60,7 @@ public class InfoPanel extends JPanel {
     private JPanel createTitledPanel(String title, Component... components) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        Border lineBorder = BorderFactory.createLineBorder(new Color(57, 149, 255), 1);
+        Border lineBorder = BorderFactory.createLineBorder(new Color(178, 47, 221), 1);
         TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, " " + title + " ");
         titledBorder.setTitleFont(new Font("Segoe UI", Font.BOLD, 12));
         titledBorder.setTitleColor(Color.DARK_GRAY);

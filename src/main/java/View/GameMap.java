@@ -29,7 +29,7 @@ public class GameMap {
         this.height = height > 0 ? height : DEFAULT_HEIGHT;
         this.mapGrid = new Block[this.height][this.width];
     }
-
+    // خونه های مپ رو پر میکنه
     private void initializeDefaultMap() {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -63,6 +63,7 @@ public class GameMap {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
+    // خونه های مجاور یک بلاک رو بررسی میکنه
     public List<Block> getAdjacentBlocks(Block block) {
         if (block == null) return Collections.emptyList();
         List<Block> neighbors = new ArrayList<>();
@@ -77,34 +78,10 @@ public class GameMap {
         }
         return neighbors;
     }
-
+    // فاصله بین بلوک ها رو میده
     public int getDistance(Block b1, Block b2) {
         if (b1 == null || b2 == null) return Integer.MAX_VALUE;
         return Math.abs(b1.getX() - b2.getX()) + Math.abs(b1.getY() - b2.getY());
-    }
-
-    public void relinkAll(List<Player> players) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Block block = getBlockAt(x, y);
-                if (block == null) continue;
-
-                Player blockOwner = block.getOwner();
-
-                if (block.getStructure() != null) {
-                    Structure s = block.getStructure();
-                    s.setBlock(block);
-                    s.setOwner(blockOwner);
-                }
-
-
-                if (block.getUnit() != null) {
-                    Unit u = block.getUnit();
-                    u.setBlock(block);
-                    u.setOwner(blockOwner);
-                }
-            }
-        }
     }
 
 }

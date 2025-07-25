@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameManager {
-    private transient InfoPanel infoPanel;
+    private transient InfoPanel infoPanel; // این تایپ transient به فایل Gson میگه که تو فرایند سریال سازی این آبجکت رو نادیده بگیره
     private List<Player> players;
     private int currentPlayerIndex;
     private GameMap gameMap;
@@ -34,12 +34,12 @@ public class GameManager {
     }
 
     public GameManager(List<Player> players, GameMap gameMap) {
-        this.players = players != null ? players : new ArrayList<>();
+        this.players = players != null ? players : new ArrayList<>(); // اگر لیست بازیکن ها خالی بود یک لیست جدید درست میکنه
         this.gameMap = gameMap;
         this.currentPlayerIndex = 0;
         this.isGameOver = false;
         if (!this.players.isEmpty()) {
-            initializePlayerPositions();
+            initializePlayerPositions(); // موقعیت اولیه بازیکن ها رو میچینه
         }
     }
 
@@ -51,7 +51,7 @@ public class GameManager {
                 p1.initializeStartingPosition(new TownHall(p1), startBlockP1);
                 startBlockP1.getStructure().setBlock(startBlockP1);
 
-                List<Block> adjacentBlocks = gameMap.getAdjacentBlocks(startBlockP1);
+                List<Block> adjacentBlocks = gameMap.getAdjacentBlocks(startBlockP1); // بلوک های مجاور تاون هال رو به پلیر میده
                 for (Block block : adjacentBlocks) {
                     if (!(block instanceof VoidBlock)) {
                         p1.addOwnedBlock(block);
@@ -61,7 +61,7 @@ public class GameManager {
         }
         if (players.size() > 1) {
             Player p2 = players.get(1);
-            Block startBlockP2 = gameMap.getBlockAt(gameMap.getWidth() - 2, gameMap.getHeight() - 2);
+            Block startBlockP2 = gameMap.getBlockAt(gameMap.getWidth() - 2, gameMap.getHeight() - 2); // به خاطر اینکه اندیس ها از 0 شروع میشن برای تقارن منهای 2 میشه
             if(startBlockP2 != null) {
                 p2.initializeStartingPosition(new TownHall(p2), startBlockP2);
                 startBlockP2.getStructure().setBlock(startBlockP2);
@@ -90,44 +90,50 @@ public class GameManager {
         return MAX_TURNS;
     }
 
-
-    private int countControlledBlocks(Player player) {
-        int count = 0;
-        for (int y = 0; y < gameMap.getHeight(); y++) {
-            for (int x = 0; x < gameMap.getWidth(); x++) {
-                Block block = gameMap.getBlockAt(x, y);
-                if (block != null && block.getOwner() == player) {
-                    count++;
-                }
-            }
-        }
-        return count;
+    public GameMap getGameMap() {
+        return gameMap;
+    }
+    public List<Player> getPlayers() {
+        return players;
+    }
+    public void setInfoPanel(InfoPanel infoPanel) {
+        this.infoPanel = infoPanel;
     }
 
-    public void endTurn() {
+
+    private int countControlledBlocks(Player player) {
+        if (player.getOwnedBlocks() != null) {
+            return player.getOwnedBlocks().size();
+        }
+        return 0;
+    }
+
+    public void endTurn() { // MainPanel فراخونی میشه این متد بیشتر توی
         if (isGameOver) return;
         Player playerWhoEndedTurn = getCurrentPlayer();
-        if (currentPlayerIndex == players.size() - 1) currentTurn++;
+        int controlledBlocks = countControlledBlocks(playerWhoEndedTurn);
+        playerWhoEndedTurn.addScore(controlledBlocks);
+        if (currentPlayerIndex == players.size() - 1) currentTurn++; // بعد از نوبت آخرین بازیکن شمارنده نوبت رو یک واحد افزایش میده
         applyEconomicRules(playerWhoEndedTurn);
         checkWinLossConditions();
         if (isGameOver) {
             if (infoPanel != null) {
-                String history = endGame();
+                String history = endGame(); // ذخیره برنده
                 infoPanel.updateWinnersHistory(history);
             }
             return;
         }
         do {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        } while (players.get(currentPlayerIndex).isDefeated());
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size(); // چرخش نوبت رو عوض میکنه
+        } while (players.get(currentPlayerIndex).isDefeated()); // تا زمانی که یه پلیر شکست نخوره این حلقه تکرار میشه
         startTurnFor(getCurrentPlayer());
     }
-
+    // قوانین اقتصادی بازی
     private void applyEconomicRules(Player player) {
         if (player.getFoodIncomePerTurn() < player.getFoodExpensePerTurn()) {
             LoggerManager.warning("Food deficit for " + player.getPlayerName() + ". Units are starving.");
-            for (Unit unit : new ArrayList<>(player.getUnits())) {
-                unit.takeDamage(1);
+            for (Unit unit : new ArrayList<>(player.getUnits())) { // پیمایش لیست نیرو های بازیکن با ایجاد یک کپی از لیست اصلی
+                unit.takeDamage(3); // اگه گرسنه باشن به تمام نیرو ها دمیج وارد میکنه
                 if (!unit.isAlive()) {
                     LoggerManager.info(unit.getClass().getSimpleName() + " starved to death.");
                     removeUnitFromGame(unit);
@@ -144,19 +150,19 @@ public class GameManager {
 
         if (player.getUnits() != null) {
             for (Unit unit : player.getUnits()) {
-                unit.resetTurnActions();
+                unit.resetTurnActions(); // حرکات و حمله نیرو ها رو ریست میکنه برای نوبت جدید
             }
         }
 
         collectTurnResourcesForPlayer(player);
     }
-
+    // درآمد بازیکن از تمام ممالکش رو جمع میکنه
     public void collectTurnResourcesForPlayer(Player player) {
         if (player == null) return;
         int totalGoldCollected = 0;
         int totalFoodCollected = 0;
         for (Block block : player.getOwnedBlocks()) {
-            ResourceYield yield = block.produceResources();
+            ResourceYield yield = block.produceResources(); // دریافت منبع تولیدی
             if (yield.getType() == ResourceType.GOLD) {
                 totalGoldCollected += yield.getAmount();
             } else if (yield.getType() == ResourceType.FOOD) {
@@ -181,20 +187,25 @@ public class GameManager {
             totalGoldMaintenance += u.getPaymentGold();
             totalFoodMaintenance += u.getRationFood();
         }
-        if (!player.payCost(totalGoldMaintenance, totalFoodMaintenance)) {
+        if (!player.payCost(totalGoldMaintenance, totalFoodMaintenance)) { // اگه منابع کافی نداشت منطق ورشکستگی رو فرا میخونه
             handleInsolvency(player);
         }
     }
-
+    // مدیریت منطق ورشکستگی
     private void handleInsolvency(Player player) {
-        List<Unit> sortedUnits = new ArrayList<>(player.getUnits());
-        sortedUnits.sort(Comparator.comparingInt(Unit::getPaymentGold).reversed());
+        List<Unit> sortedUnits = new ArrayList<>(player.getUnits()); // یک کپی از لیست نیرو ها
+        sortedUnits.sort(new Comparator<Unit>() { // این متد برای به ترتیب کردن نیرو ها بر اساس ارزششون استفاده شده
+            @Override
+            public int compare(Unit u1, Unit u2) {
+                return Integer.compare(u2.getPaymentGold(), u1.getPaymentGold());
+            }
+        });
         for (Unit unit : sortedUnits) {
             removeUnitFromGame(unit);
             if (player.canAfford(0, 0)) break;
         }
     }
-
+    // شرایط برد و باخت رو بررسی میکنه
     private void checkWinLossConditions() {
         if (currentTurn > MAX_TURNS) {
             isGameOver = true;
@@ -225,21 +236,27 @@ public class GameManager {
                 LoggerManager.info("Player '" + player.getPlayerName() + "' has been defeated!");
             }
         }
-        List<Player> activePlayers = players.stream().filter(p -> !p.isDefeated()).collect(Collectors.toList());
-        if (activePlayers.size() <= 1) {
+        int activePlayersCount = 0;
+        for (Player p : players) {
+            if (!p.isDefeated()) {
+                activePlayersCount++;
+            }
+        }
+        if (activePlayersCount <= 1) {
             isGameOver = true;
         }
     }
-
+    // قوانین حرکت نیرو ها
     public void tryMoveUnit(Player player, Unit unit, Block destination) {
         if (player != getCurrentPlayer() || unit == null || unit.getOwner() != player) return;
-        if (!unit.canMove()) {
+        if (!unit.canMove()) { // بررسی مجاز بودن حرکت نیرو
             System.out.println("Move failed: Unit has no moves left this turn.");
             return;
         }
         Block source = unit.getBlock();
         if (source == null || destination == null) return;
-        if (gameMap.getDistance(source, destination) > unit.getMovementBlockRange()) {
+
+        if (gameMap.getDistance(source, destination) > unit.getMovementBlockRange()) { // بررسی محدوده حرکت نیرو
             System.out.println("Move failed: Destination is out of range.");
             return;
         }
@@ -249,46 +266,49 @@ public class GameManager {
         }
         if (!destination.canMoveInto()) {
             System.out.println("Move failed: Destination is invalid or occupied by your own unit.");
-            return;
+            return; // چک میکنه مقد ویدبلاک یا نیروی خودی نباشه
         }
-        List<Block> neighborsOfDestination = gameMap.getAdjacentBlocks(destination);
+        // قانون محدودیت برج دفاعی
+        List<Block> neighborsOfDestination = gameMap.getAdjacentBlocks(destination); // یه لیست از بلاک های همسایه میسازیم و چک میکنیم که برج هست یا نه
         for (Block neighbor : neighborsOfDestination) {
             if (neighbor.hasStructure() && neighbor.getStructure().getOwner() != player && neighbor.getStructure() instanceof Tower) {
-                Tower enemyTower = (Tower) neighbor.getStructure();
-                if (unit.getRank() <= enemyTower.getRestrictionLevel()) {
+                Tower enemyTower = (Tower) neighbor.getStructure(); // تایپ کستینگ برای اینکه ساختمانمان حتما برج است
+                if (unit.getRank() <= enemyTower.getRestrictionLevel()) { //مقایسه رنک نیرو با لول برج
                     System.out.println("Move failed: Blocked by an enemy Tower!");
                     return;
                 }
             }
         }
-
+        // اجرای حرکت
         source.setUnit(null);
         destination.setUnit(unit);
         unit.setBlock(destination);
-        unit.incrementMovesMade();
+        unit.incrementMovesMade(); // شمارنده حرکت نیرو رو افزایش میده
         if (destination.getOwner() != player) {
             if (destination.getOwner() != null) destination.getOwner().removeOwnedBlock(destination);
             player.addOwnedBlock(destination);
         }
         LoggerManager.info("Unit " + unit.getClass().getSimpleName() + " moved to (" + destination.getX() + "," + destination.getY() + ").");
     }
-
+    // قوانین حمله
     public void tryAttack(Player player, Unit attacker, Block targetBlock) {
         if (player != getCurrentPlayer() || attacker == null || attacker.getOwner() != player) return;
-        if (attacker.hasAttackedThisTurn()) {
+        if (attacker.hasAttackedThisTurn()) { // بررسی تعداد حمله از قبل
             System.out.println("Attack failed: This unit has already attacked this turn.");
             return;
         }
-        if (targetBlock == null || gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) return;
-        Object target = targetBlock.getUnit() != null ? targetBlock.getUnit() : targetBlock.getStructure();
+        if (targetBlock == null || gameMap.getDistance(attacker.getBlock(), targetBlock) > attacker.getAttackRange()) return; // بررسی محدوده حمله
+        Object target = targetBlock.getUnit() != null ? targetBlock.getUnit() : targetBlock.getStructure(); // اگه نیرو روی ساختمون بود ، به نیرو حمله میکنه
         if (target == null) return;
         Player targetOwner = (target instanceof Unit) ? ((Unit) target).getOwner() : ((Structure) target).getOwner();
-        if (targetOwner == player) return;
+        if (targetOwner == player) return; // عدم حمله به نیروی خودی
 
         int damage = attacker.getAttackPower();
+        // اعمال پاداش حمله و دفاع از جنگل
         if (attacker.getBlock() instanceof ForestBlock && ((ForestBlock) attacker.getBlock()).hasForest()) damage = (int) (damage * 1.5);
         if (targetBlock instanceof ForestBlock && ((ForestBlock) targetBlock).hasForest()) damage = (int) (damage * 0.75);
 
+        //اعمال آسیب
         String attackMessage = "";
         if (target instanceof Unit) {
             Unit targetUnit = (Unit) target;
@@ -327,15 +347,15 @@ public class GameManager {
             removeUnitFromGame(unit1);
             removeUnitFromGame(unit2);
             player.addUnit(newUnit);
-            position.setUnit(newUnit);
+            position.setUnit(newUnit); // قرار دادن نیروی جدید روی نقشه
             newUnit.setBlock(position);
             System.out.println(message);
             LoggerManager.info(message);
         }
     }
-
+    // متد ساخت ساختمان ها
     public void tryBuildStructure(Player player, StructureType type, int x, int y) {
-        if (player != getCurrentPlayer()) return;
+        if (player != getCurrentPlayer()) return; // بررسی نوبت
         Block targetBlock = gameMap.getBlockAt(x, y);
         if (targetBlock == null || targetBlock.getOwner() != player || !targetBlock.canBuildStructure()) return;
         int buildingCost = 0, maxAllowed = Integer.MAX_VALUE;
@@ -376,7 +396,7 @@ public class GameManager {
         player.addStructure(newStructure);
         targetBlock.setStructure(newStructure);
         newStructure.setBlock(targetBlock);
-        if (targetBlock instanceof ForestBlock) {
+        if (targetBlock instanceof ForestBlock) { // اگه ساختمان روی جنگل بنا شد، جنگل از بین میره
             ((ForestBlock) targetBlock).removeForest();
         }
     }
@@ -452,45 +472,24 @@ public class GameManager {
         }
     }
 
-
-    public void resetGameData() {
-        String sql = "DELETE FROM game_results";
-
-        try (Connection conn = dataBaseConnection.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Previous game data cleared!");
-        } catch (SQLException e) {
-            System.err.println("Error clearing game data: " + e.getMessage());
-        }
-    }
-
     public void startGame() {
         if (this.players == null || this.players.isEmpty()) {
             System.err.println("Cannot start game with no players.");
             return;
         }
-
         initializePlayerPositions();
         System.out.println("Game Started!");
 
         startTurnFor(getCurrentPlayer());
     }
 
-
+    // محاسبه امتیاز بازیکن
     public void calculateScores() {
         for (Player player : players) {
             int score = 0;
-
-
             score += player.getStructures().size() * 10;
-
-
             score += player.getUnits().size() * 5;
-
-
             score += (player.getGold() / 10) + (player.getFood() / 5);
-
             player.addScore(score);
         }
     }
@@ -498,12 +497,12 @@ public class GameManager {
 
     public String endGame() {
         calculateScores();
-
-        Player winner = players.stream()
-                .filter(p -> !p.isDefeated())
-                .findFirst()
-                .orElse(null);
-
+        Player winner = null;
+        for (Player p : players) {
+            if (!p.isDefeated()) {
+                winner = p;
+                break;
+            }}
         if (winner != null) {
             gameRepository.saveWinner(winner);
             String message = String.format("Game Over! Winner: %s (Score: %d)", winner.getPlayerName(), winner.getScore());
@@ -511,46 +510,11 @@ public class GameManager {
         } else {
             LoggerManager.info("Game Over! It's a draw.");
         }
-
         String history = gameRepository.getLastWinners();
         return history;
     }
-
-
-
-    public GameMap getGameMap() {
-        return gameMap;
-    }
-
-    public List<Player> getPlayers() {
-        return players;
-    }
-
-
-    public void setInfoPanel(InfoPanel infoPanel) {
-        this.infoPanel = infoPanel;
-    }
-
-
-    private void showGameOverDialog (Player winner){
-
-        String lastGames = gameRepository.getLastWinners();
-
-        String message = String.format(
-                "بازی تمام شد!\nبرنده: %s\nامتیاز: %d\n\n--- ۵ بازی اخیر ---\n%s",
-                winner.getPlayerName(),
-                winner.getScore(),
-                lastGames
-        );
-
-
-        System.out.println("================ GAME OVER ================");
-        System.out.println(message);
-        System.out.println("=========================================");
-
-
-    }
-
+    // اصلی ترین متد ذخیره و بازیابی گیم + سخت ترین :)
+    // transient رو بعد از بارگذاری و سیو به حالت قبل بر میگردونه این متد تمام اشیاء
     public void relinkAfterLoad() {
         if (this.gameMap == null || this.players == null) {
             System.err.println("Relink failed: gameMap or players list is null after loading.");
@@ -559,12 +523,12 @@ public class GameManager {
 
         Map<Integer, Player> playerMap = new HashMap<>();
         for (Player p : this.players) {
-            playerMap.put(p.getPlayerId(), p);
+            playerMap.put(p.getPlayerId(), p); // کلید شناسه بازیکن و مقدار خود شیء بازیکن
 
             if (p.getUnits() == null) {
                 try {
-                    java.lang.reflect.Field field = Player.class.getDeclaredField("units");
-                    field.setAccessible(true);
+                    java.lang.reflect.Field field = Player.class.getDeclaredField("units"); // فیلد یونیت رو میره و از کلاس پلیر پیدا میکنه
+                    field.setAccessible(true); // قفلش رو باز میکنه ، اگه پرایوت یا فاینال باشه
                     field.set(p, new ArrayList<Unit>());
                 } catch (Exception e) { e.printStackTrace(); }
             } else {
@@ -592,15 +556,15 @@ public class GameManager {
             }
         }
 
-
+        // پر کردن لیست اشیاء بازیکن ها
         for (int y = 0; y < gameMap.getHeight(); y++) {
             for (int x = 0; x < gameMap.getWidth(); x++) {
                 Block block = gameMap.getBlockAt(x, y);
                 if (block == null) continue;
 
-                if (block.getOwnerId() != -1) {
+                if (block.getOwnerId() != -1) { // اگه این بلوک مالکی داشت...
                     Player blockOwner = playerMap.get(block.getOwnerId());
-                    block.setOwner(blockOwner);
+                    block.setOwner(blockOwner); // پیوند دو طرفه بلوک و مالک رو برقرار میکنه
                     if (blockOwner != null) blockOwner.addOwnedBlock(block);
                 }
 

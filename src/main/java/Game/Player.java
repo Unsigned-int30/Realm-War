@@ -14,15 +14,16 @@ public class Player {
     private int gold;
     private int food;
     private int score;
-    private transient TownHall townHall;
+    private transient TownHall townHall; // این تایپ transient به فایل Gson میگه که تو فرایند سریال سازی این آبجکت رو نادیده بگیره
     private boolean isDefeated;
 
+    // این لیست ها هرچی که بازیکن داره رو توی خودشون ذخیره میکنن
     private transient final List<Unit> units = new ArrayList<>();
     private transient final List<Structure> structures = new ArrayList<>();
     private transient final List<Block> ownedBlocks = new ArrayList<>();
 
-    private static final int INITIAL_GOLD = 50;
-    private static final int INITIAL_FOOD = 20;
+    private static final int INITIAL_GOLD = 30;
+    private static final int INITIAL_FOOD = 15;
 
     public Player(int playerId, String playerName) {
         this.playerId = playerId;
@@ -33,6 +34,7 @@ public class Player {
         this.score = 0;
     }
 
+    // متد محاسبه درآمد تو هر نوبت
     public int getGoldIncomePerTurn() {
         int income = 0;
         for (Structure s : this.structures) {
@@ -53,6 +55,7 @@ public class Player {
                 income += b.produceResources().getAmount();
             }}return income;
     }
+    // محاسبه هزینه ها در هر نوبت
     public int getGoldExpensePerTurn() {
         int expense = 0;
         for (Structure s : this.structures) {
@@ -80,10 +83,12 @@ public class Player {
     public List<Block> getOwnedBlocks() { return ownedBlocks; }
     public int getScore() { return score; }
     public void addScore(int points) { if (points > 0) this.score += points; }
+    // نقشه شروع بازیکن روی نقشه رو تنظیم میکنه
     public void initializeStartingPosition(TownHall townHall, Block startingBlock) {
         if (townHall == null || startingBlock == null) return;
         this.townHall = townHall;
-        if (!this.structures.contains(townHall)) this.structures.add(townHall);
+        if (!this.structures.contains(townHall))
+            this.structures.add(townHall);
         addOwnedBlock(startingBlock);
         startingBlock.setStructure(townHall);
     }
@@ -105,7 +110,7 @@ public class Player {
     public void addUnit(Unit unit) { if (unit != null && !this.units.contains(unit)) this.units.add(unit); }
     public void removeUnit(Unit unit) { this.units.remove(unit); }
     @Override public boolean equals(Object o) { if (this == o) return true; if (o == null || getClass() != o.getClass()) return false; Player player = (Player) o; return playerId == player.playerId; }
-    @Override public int hashCode() { return Objects.hash(playerId); }
+    @Override public int hashCode() { return Objects.hash(playerId); } // دو تا متد بالا برای سرچ داخل لیست ها و مقایسه آبجکت ها بازنویسی شدن
     public int getCurrentUnitSpaceUsed() {
         int usedSpace = 0;
         for (Unit unit : this.units) { if (unit != null) usedSpace += unit.getUnitSpace(); }
@@ -117,9 +122,9 @@ public class Player {
         return maxSpace;
     }
     public boolean canPlaceUnit(Unit unitToAdd) { if (unitToAdd == null) return false; return (getMaxUnitSpace() - getCurrentUnitSpaceUsed()) >= unitToAdd.getUnitSpace(); }
-    public int getStructureCountByType(StructureType type) {
+    public int getStructureCountByType(StructureType type) { // این متد تعداد ساختمون های از یک نوع رو میشماره با استفاده از Enum
         int count = 0;
-        Class<?> structureClass = null;
+        Class<?> structureClass = null; // این متغیر میتونه هر نوع کلاسی رو در خودش جای بده
         switch (type) {
             case FARM: structureClass = Farm.class; break;
             case MARKET: structureClass = Market.class; break;

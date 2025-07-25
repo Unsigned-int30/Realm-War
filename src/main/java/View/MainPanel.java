@@ -41,7 +41,7 @@ public class MainPanel extends JPanel {
 
         loadGameInBackground();
     }
-
+    // محیط گرافیکی رو در پس زمینه ران میکنه تا از همزمانی کارها جلوگیری بشه
     private void loadGameInBackground() {
         SwingWorker<GameManager, Void> worker = new SwingWorker<>() {
             @Override
@@ -55,7 +55,7 @@ public class MainPanel extends JPanel {
                 GameMap newMap = new GameMap();
                 return new GameManager(players, newMap);
             }
-
+            // این متد در نخ اصلی ران میشه
             @Override
             protected void done() {
                 try {
@@ -65,16 +65,16 @@ public class MainPanel extends JPanel {
                     setupGameUI();
 
                     gameManager.setInfoPanel(infoPanel);
-                    addListeners();
+                    addListeners(); // اضافه کردن کنترلرها
                     setupTimer();
-                    gameManager.startGame();
+                    gameManager.startGame(); // شروع بازی
                     updateUI();
                     startTurnTimer();
 
                     MusicPlayer.playBackgroundMusic();
 
 
-                    parentFrame.pack();
+                    parentFrame.pack(); // تنظیم نهایی پنجره اصلی
                     parentFrame.setLocationRelativeTo(null);
 
                 } catch (Exception e) {
@@ -99,7 +99,7 @@ public class MainPanel extends JPanel {
         this.revalidate();
         this.repaint();
     }
-
+    // کنترلرها
     private void addListeners() {
         controlPanel.getEndTurnButton().addActionListener(e -> endTurnAndReset());
         controlPanel.getBuildActionsButton().addActionListener(e -> handleShowBuildOptions());
@@ -111,7 +111,7 @@ public class MainPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (gameManager == null || gameManager.isGameOver()) return;
-                int x = e.getX() / mapPanel.getCellSize();
+                int x = e.getX() / mapPanel.getCellSize(); // تبدیل مختصات پیکسلی به اندیس خونه ها
                 int y = e.getY() / mapPanel.getCellSize();
                 if (!gameMap.isValidCoordinate(x, y)) return;
                 Block clickedBlock = gameMap.getBlockAt(x, y);
@@ -122,7 +122,7 @@ public class MainPanel extends JPanel {
 
     private void handleMapClick(Block clickedBlock) {
         Player currentPlayer = gameManager.getCurrentPlayer();
-        if (selectedUnit != null) {
+        if (selectedUnit != null) { // اگه نیرویی از قبل انتخاب شده
             Unit targetUnit = clickedBlock.getUnit();
             boolean isFriendlyUnitTarget = targetUnit != null && targetUnit.getOwner() == currentPlayer && selectedUnit != targetUnit;
             boolean isEnemyBlock = clickedBlock.getOwner() != null && clickedBlock.getOwner() != currentPlayer;
@@ -137,7 +137,7 @@ public class MainPanel extends JPanel {
             }
             clearSelection();
             updateUI();
-        } else {
+        } else { // هیچ نیرویی انتخاب نشده باشه
             selectedBlock = clickedBlock;
             selectedUnit = clickedBlock.hasUnit() && clickedBlock.getUnit().getOwner() == currentPlayer ? clickedBlock.getUnit() : null;
             mapPanel.setSelectedBlock(selectedBlock);
@@ -145,7 +145,7 @@ public class MainPanel extends JPanel {
             updateButtonStates();
         }
     }
-
+    // مدیریت ذخیره بازی
     private void handleSaveGame() {
         String saveName = JOptionPane.showInputDialog(parentFrame, "Enter a name for your save:", "Save Game", JOptionPane.PLAIN_MESSAGE);
         if (saveName == null || saveName.trim().isEmpty()) return;
@@ -234,7 +234,7 @@ public class MainPanel extends JPanel {
             updateUI();
         }
     }
-
+    //پیام مربوط به ساخت و ساز سازه ها رو نشون میده
     private void handleShowBuildOptions() {
         if (selectedBlock == null) { JOptionPane.showMessageDialog(parentFrame, "Please select a block first.", "Build Error", JOptionPane.ERROR_MESSAGE); return; }
         StructureType[] buildOptions = StructureType.values();
@@ -266,7 +266,7 @@ public class MainPanel extends JPanel {
             infoPanel.updateTimer(timeLeft);
             if (timeLeft <= 0) {
                 turnTimer.stop();
-                endTurnAndReset();
+                endTurnAndReset(); // نوبت رو تموم میکنه
             }
         };
         turnTimer = new Timer(1000, timerAction);
@@ -290,7 +290,7 @@ public class MainPanel extends JPanel {
             startTurnTimer();
         }
     }
-
+    // آخرین وضعیت بازی رو بروز میکنه
     public void updateUI() {
         if (gameManager == null) return;
         Player currentPlayer = gameManager.getCurrentPlayer();
@@ -314,7 +314,7 @@ public class MainPanel extends JPanel {
             mapPanel.refreshView();
         }
     }
-
+    // وضعیت فعال یا غیر فعال بودن دکمه ها رو چک میکنه
     private void updateButtonStates() {
         Player currentPlayer = gameManager.getCurrentPlayer();
         if (currentPlayer == null || controlPanel == null) return;
@@ -341,8 +341,6 @@ public class MainPanel extends JPanel {
         if (mapPanel != null) mapPanel.setSelectedBlock(null);
         updateSelectionInfoPanel();
     }
-
-
 
     private void updateSelectionInfoPanel() {
         if (infoPanel == null || selectedBlock == null) {

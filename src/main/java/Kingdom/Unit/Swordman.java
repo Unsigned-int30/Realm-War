@@ -9,8 +9,8 @@ public class Swordman extends Unit {
     public static final int SWORDMAN_MOVEMENT = 2;
     public static final int SWORDMAN_ATTACK_POWER = 8;
     public static final int SWORDMAN_ATTACK_RANGE = 1;
-    public static final int SWORDMAN_GOLD_COST = 3;
-    public static final int SWORDMAN_FOOD_COST = 2;
+    public static final int SWORDMAN_GOLD_COST = 4;
+    public static final int SWORDMAN_FOOD_COST = 4;
     public static final int SWORDMAN_UNIT_SPACE = 2;
 
     public Swordman(Player owner) {

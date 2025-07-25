@@ -9,7 +9,7 @@ public class MusicPlayer {
     private static Clip clip;
 
     public static void playBackgroundMusic() {
-        System.out.println("playBackgroundMusic() called");
+        //System.out.println("playBackgroundMusic() called");
 
         if (clip != null && clip.isRunning()) {
             System.out.println("Clip already running");
@@ -17,9 +17,9 @@ public class MusicPlayer {
         }
 
         try {
-            System.out.println("Trying to load /music/background.wav as resource...");
+            //System.out.println("Trying to load /music/background.wav as resource...");
             InputStream audioSrc = MusicPlayer.class.getResourceAsStream("/music/background.wav");
-            System.out.println(audioSrc == null ? "Resource NOT found!" : "Resource found!");
+           // System.out.println(audioSrc == null ? "Resource NOT found!" : "Resource found!");
 
             if (audioSrc == null) {
                 return;
@@ -39,12 +39,11 @@ public class MusicPlayer {
     }
 
 
-    public static void stopMusic() {
-        if (clip != null && clip.isRunning()) {
-            clip.stop();
-            clip.close();
-            System.out.println("Music stopped.");
-        }
-    }
+//    public static void stopMusic() {
+//        if (clip != null && clip.isRunning()) {
+//            clip.stop();
+//            clip.close();
+//            System.out.println("Music stopped.");
+//        }
+//    }
 }
-//new

@@ -9,7 +9,7 @@ public class RealmWarFrame {
     private static JFrame frame;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> { // برای جلوگیری از قفل کردن صفحه بازی
             frame = new JFrame("Realm War");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -28,8 +28,8 @@ public class RealmWarFrame {
 
         frame.getContentPane().removeAll();
         frame.getContentPane().add(mainMenu);
-        frame.pack();
-        frame.revalidate();
+        frame.pack(); // اندازه پنجره رو متناسب با محتوای داخلش اوکی میکنه
+        frame.revalidate(); // این دو تا هم برای اطمینان از نمایش درست پنجره اصلی استفاده شدن
         frame.repaint();
     }
 

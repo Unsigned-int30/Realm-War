@@ -8,7 +8,7 @@ public class Farm extends Structure {
     public static final int MAINTENANCE_COST = 2;
     public static final int INITIAL_LEVEL_UP_COST = 15;
     public static final int MAX_ALLOWED = 4;
-    private static final int BASE_FOOD_PRODUCTION_PER_LEVEL = 5;
+    private static final int BASE_FOOD_LEVEL = 5;
     public static final int MAX_LEVEL = 3;
     private static final int DURABILITY_INCREASE_PER_LEVEL = 15;
 
@@ -18,7 +18,7 @@ public class Farm extends Structure {
 
     @Override
     public int getFoodProductionPerTurn() {
-        return getLevel() * BASE_FOOD_PRODUCTION_PER_LEVEL;
+        return getLevel() * BASE_FOOD_LEVEL;
     }
 
     @Override

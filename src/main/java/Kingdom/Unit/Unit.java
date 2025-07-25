@@ -4,7 +4,7 @@ import Game.Player;
 import Kingdom.Block.Block;
 
 public abstract class Unit {
-    private int hitPoints;
+    private int hitPoints; // جان نیرو
     private int ownerId = -1;
     private transient Player owner;
     private int movementBlockRange;
@@ -17,7 +17,7 @@ public abstract class Unit {
 
     private boolean hasAttackedThisTurn;
     private int movesMadeThisTurn;
-    private static final int MAX_MOVES_PER_TURN = 2;
+    private static final int MAX_MOVES_PER_TURN = 2; // حداکثر حرکت تو هر نوبت
 
     public Unit(int hitPoints, int movementBlockRange, int attackPower, int attackRange, int paymentGold, int rationFood, int unitSpace, Player owner) {
         this.hitPoints = hitPoints;
@@ -35,18 +35,16 @@ public abstract class Unit {
     public boolean hasAttackedThisTurn() {
         return hasAttackedThisTurn;
     }
-
     public void setHasAttackedThisTurn(boolean hasAttacked) {
         this.hasAttackedThisTurn = hasAttacked;
     }
-
     public boolean canMove() {
         return this.movesMadeThisTurn < MAX_MOVES_PER_TURN;
     }
 
     public void incrementMovesMade() {
         this.movesMadeThisTurn++;
-    }
+    } // شمارنده تعداد حرکت
 
     public void resetTurnActions() {
         this.hasAttackedThisTurn = false;
@@ -68,12 +66,10 @@ public abstract class Unit {
     public int getUnitSpace() { return unitSpace; }
     public void takeDamage(int damage) { if (damage > 0) setHitPoints(getHitPoints() - damage); }
     public boolean isAlive() { return this.hitPoints > 0; }
-    public abstract int getRank();
+    public abstract int getRank(); // برای ادغام نیرو ها + حالت دفاعی برج
     public abstract Unit merge(Unit other);
     public abstract boolean canMerge(Unit other);
 //    public abstract void heal(int amount);
-
     public abstract boolean canAttack(Unit target);
-
     public abstract void dealDamage(int damage);
 }

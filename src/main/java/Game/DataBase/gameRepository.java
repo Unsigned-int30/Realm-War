@@ -20,15 +20,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class gameRepository {
-
-
     private static final Gson gson = createGsonInstance();
-
     private static Gson createGsonInstance() {
-
+        // ساختن آداپتور مخصوص برای سلسله مراتب کلاس های Kingdom
         RuntimeTypeAdapter<Block> blockAdapterFactory = RuntimeTypeAdapter
                 .of(Block.class, "type")
-                .registerSubtype(EmptyBlock.class)
+                .registerSubtype(EmptyBlock.class) // ثبت کلاس های فرزند
                 .registerSubtype(ForestBlock.class)
                 .registerSubtype(VoidBlock.class);
 
@@ -61,33 +58,33 @@ public class gameRepository {
 
     public static void saveGame(GameManager gameManager, String gameName) {
         String sql = "INSERT INTO saved_games (game_name, game_state) VALUES (?, ?::jsonb)";
-        try (Connection conn = dataBaseConnection.getConnection();
+        try (Connection conn = dataBaseConnection.getConnection(); // برای مدیریت خودکار اتصال
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            String gameStateJson = gson.toJson(gameManager);
+            String gameStateJson = gson.toJson(gameManager); // کل گیم منیجر تبدیل به یک رشته جیسون میکنه
             pstmt.setString(1, gameName);
-            System.out.println("---- SAVING THIS JSON ----");
-            System.out.println(gameStateJson);
-            System.out.println("--------------------------");
             pstmt.setString(2, gameStateJson);
             pstmt.executeUpdate();
             System.out.println("Game saved successfully as '" + gameName + "'!");
+            LoggerManager.info("Game saved successfully as '" + gameName + "'!");
+
         } catch (SQLException e) {
             System.err.println("Error saving game state: " + e.getMessage());
+            LoggerManager.severe("Error saving game state: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
 
     public static GameManager loadGame(String gameName) {
-        String sql = "SELECT game_state FROM saved_games WHERE game_name = ? ORDER BY save_time DESC LIMIT 1";
+        String sql = "SELECT game_state FROM saved_games WHERE game_name = ? ORDER BY save_time DESC LIMIT 1"; // آخرین سیو با همون نام رو برمیگردونه
         GameManager loadedGameManager = null;
         try (Connection conn = dataBaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, gameName);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
+            if (rs.next()) { // بررسی میکنه ذخیره ایی پیدا شده یا نه
                 String gameStateJson = rs.getString("game_state");
-                loadedGameManager = gson.fromJson(gameStateJson, GameManager.class);
+                loadedGameManager = gson.fromJson(gameStateJson, GameManager.class); // گیم منیجر از رشته متنی جیسون تبدیل به حالت قبل میشه
             }
         } catch (SQLException e) {
             System.err.println("Error loading game state: " + e.getMessage());

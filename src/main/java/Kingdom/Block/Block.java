@@ -26,7 +26,11 @@ public abstract class Block {
     public void setUnit(Unit unit) { this.unit = unit; }
     public void setOwner(Player owner) {
         this.owner = owner;
-        this.ownerId = (owner != null) ? owner.getPlayerId() : -1;
+        if (owner != null) {
+            this.ownerId = owner.getPlayerId();
+        } else {
+            this.ownerId = -1;
+        }
     }
     public boolean canBuildStructure() { return !hasStructure(); }
     public boolean canMoveInto() { return !hasUnit(); }

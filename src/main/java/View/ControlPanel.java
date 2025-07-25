@@ -39,7 +39,7 @@ public class ControlPanel extends JPanel {
         JButton button = new JButton(text);
 
         Color normalColor = new Color(70, 70, 80);
-        Color hoverColor = new Color(100, 100, 110);
+        Color hoverColor = new Color(100, 100, 110); // وقتی موس روی دکمه است
 
         button.setPreferredSize(new Dimension(140, 40));
         button.setFont(new Font("Segoe UI", Font.BOLD, 14));
